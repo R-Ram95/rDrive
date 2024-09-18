@@ -9,11 +9,11 @@
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
-    "synth": "cdk synth",
     "local": "sam local start-api -t ./cdk.out/BackendStack.template.json"
   },
   "devDependencies": {
     "@types/jest": "^27.5.2",
+    "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^10.17.27",
     "@types/prettier": "2.6.0",
     "aws-cdk": "2.50.0",
@@ -26,6 +26,8 @@
     "@types/aws-lambda": "^8.10.145",
     "aws-cdk-lib": "2.158.0",
     "constructs": "^10.0.0",
+    "dotenv": "^16.4.5",
+    "jsonwebtoken": "^9.0.2",
     "source-map-support": "^0.5.21"
   }
 }
