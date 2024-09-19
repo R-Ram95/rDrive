@@ -18,8 +18,7 @@ export class APIStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // Define Lambda function
-    const authorizationLambda = new NodejsFunction(this, "auth-lambda", {
+    const authorizationLambda = new NodejsFunction(this, "AuthLambda", {
       runtime: Runtime.NODEJS_20_X,
       handler: "handler",
       functionName: "auth-lambda",
@@ -29,14 +28,7 @@ export class APIStack extends cdk.Stack {
       },
     });
 
-    const testLambda = new NodejsFunction(this, "TestFunction", {
-      runtime: Runtime.NODEJS_20_X,
-      handler: "handler",
-      functionName: "test-function",
-      entry: path.join(__dirname, "../lambdas/operational/test", "index.ts"),
-    });
-
-    const tokenAuthorizer = new HttpLambdaAuthorizer(
+    const lambdaAuthorizer = new HttpLambdaAuthorizer(
       "DefaultAuthorizer",
       authorizationLambda,
       {
@@ -44,27 +36,26 @@ export class APIStack extends cdk.Stack {
       }
     );
 
-    // Define API Gateway HTTP API
-    const httpApi = new apigwv2.HttpApi(this, "cloud-storage-api", {
-      defaultAuthorizer: tokenAuthorizer,
+    const testLambda = new NodejsFunction(this, "TestFunction", {
+      runtime: Runtime.NODEJS_20_X,
+      handler: "handler",
+      functionName: "test-function",
+      entry: path.join(__dirname, "../lambdas/endpoints/test", "index.ts"),
     });
 
-    // Define Lambda integration for the API Gateway
+    const httpApi = new apigwv2.HttpApi(this, "CloudStorageAPI", {
+      defaultAuthorizer: lambdaAuthorizer,
+    });
+
     const testLambdaIntegration = new HttpLambdaIntegration(
       "LambdaIntegration",
       testLambda
     );
 
-    // // Add routes to the API Gateway
     httpApi.addRoutes({
       path: "/test",
       methods: [HttpMethod.GET],
       integration: testLambdaIntegration,
     });
-
-    // define lambdas
-    // define api gateway
-    // define auth
-    // TODO => create new stack for DB??
   }
 }
