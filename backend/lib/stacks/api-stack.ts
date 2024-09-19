@@ -1,54 +1,42 @@
-import * as cdk from "aws-cdk-lib";
-import { aws_apigatewayv2 as apigwv2 } from "aws-cdk-lib";
+import { StackProps, Stack, aws_apigatewayv2 as apigwv2 } from "aws-cdk-lib";
 import { HttpMethod } from "aws-cdk-lib/aws-apigatewayv2";
-import {
-  HttpLambdaAuthorizer,
-  HttpLambdaResponseType,
-} from "aws-cdk-lib/aws-apigatewayv2-authorizers";
+import { HttpUserPoolAuthorizer } from "aws-cdk-lib/aws-apigatewayv2-authorizers";
 import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
+import { UserPool, UserPoolClient } from "aws-cdk-lib/aws-cognito";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
 import * as path from "path";
-import * as dotenv from "dotenv";
 
-dotenv.config();
+interface APIStackProps extends StackProps {
+  appName: string;
+  userPool: UserPool;
+  appClient: UserPoolClient;
+}
 
-export class APIStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+export class APIStack extends Stack {
+  constructor(scope: Construct, id: string, props: APIStackProps) {
     super(scope, id, props);
 
-    const authorizationLambda = new NodejsFunction(this, "AuthLambda", {
+    const testLambda = new NodejsFunction(this, `${props.appName}-TestLambda`, {
       runtime: Runtime.NODEJS_20_X,
       handler: "handler",
-      functionName: "auth-lambda",
-      entry: path.join(__dirname, "../lambdas/authorizer", "index.ts"),
-      environment: {
-        CLERK_PUBLIC_KEY: process.env.CLERK_PUBLIC_KEY!,
-      },
-    });
-
-    const lambdaAuthorizer = new HttpLambdaAuthorizer(
-      "DefaultAuthorizer",
-      authorizationLambda,
-      {
-        responseTypes: [HttpLambdaResponseType.SIMPLE],
-      }
-    );
-
-    const testLambda = new NodejsFunction(this, "TestFunction", {
-      runtime: Runtime.NODEJS_20_X,
-      handler: "handler",
-      functionName: "test-function",
+      functionName: `${props.appName}-test-function`,
       entry: path.join(__dirname, "../lambdas/endpoints/test", "index.ts"),
     });
 
-    const httpApi = new apigwv2.HttpApi(this, "CloudStorageAPI", {
-      defaultAuthorizer: lambdaAuthorizer,
+    const apiAuthorizer = new HttpUserPoolAuthorizer(
+      `${props.appName}-APIAuthorizer`,
+      props.userPool,
+      { userPoolClients: [props.appClient] }
+    );
+
+    const httpApi = new apigwv2.HttpApi(this, `${props.appName}-API`, {
+      defaultAuthorizer: apiAuthorizer,
     });
 
     const testLambdaIntegration = new HttpLambdaIntegration(
-      "LambdaIntegration",
+      "TestLambdaIntegration",
       testLambda
     );
 
@@ -56,6 +44,7 @@ export class APIStack extends cdk.Stack {
       path: "/test",
       methods: [HttpMethod.GET],
       integration: testLambdaIntegration,
+      authorizer: apiAuthorizer,
     });
   }
 }

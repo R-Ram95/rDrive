@@ -1,21 +1,25 @@
-import { Duration, Stack, StackProps } from "aws-cdk-lib";
+import { Duration, RemovalPolicy, Stack, StackProps } from "aws-cdk-lib";
 import {
   UserPool,
   UserPoolEmail,
   AccountRecovery,
   Mfa,
+  UserPoolClient,
 } from "aws-cdk-lib/aws-cognito";
 import { Construct } from "constructs";
 
-interface CognitoStackProps extends StackProps {
+interface AuthStackProps extends StackProps {
   appName: string;
 }
 
-export class CognitoStack extends Stack {
-  constructor(scope: Construct, id: string, props?: CognitoStackProps) {
+export class AuthStack extends Stack {
+  readonly userPool: UserPool;
+  readonly appClient: UserPoolClient;
+
+  constructor(scope: Construct, id: string, props: AuthStackProps) {
     super(scope, id, props);
 
-    const userPool = new UserPool(this, `${props?.appName}-UserPool`, {
+    this.userPool = new UserPool(this, `${props.appName}-UserPool`, {
       userPoolName: `${props?.appName}-UserPool`,
       accountRecovery: AccountRecovery.EMAIL_ONLY,
       email: UserPoolEmail.withCognito(),
@@ -35,11 +39,12 @@ export class CognitoStack extends Stack {
         emailBody:
           "Hello {username},\n\nThis is your invitation to join r:Drive! Your temporary password is {####}. Please use it to sign in and change your password - it expires in 7 days.\n\n Thank you,\nr:Drive developer <3",
       },
+      removalPolicy: RemovalPolicy.DESTROY, // DEV ONLY REMOVE IN PROD
     });
 
     // create app client
-    userPool.addClient(`${props?.appName}`, {
-      userPoolClientName: `${props?.appName}-WebApplication`,
+    this.appClient = this.userPool.addClient(`${props.appName}`, {
+      userPoolClientName: `${props.appName}-WebAppClient`,
       idTokenValidity: Duration.minutes(30),
       accessTokenValidity: Duration.minutes(30),
       refreshTokenValidity: Duration.minutes(60),
