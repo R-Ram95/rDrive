@@ -1,22 +1,10 @@
-import { StackProps, Stack, CfnOutput } from "aws-cdk-lib";
-import {
-  HttpMethod,
-  DomainName,
-  HttpApi,
-  EndpointType,
-  ApiMapping,
-} from "aws-cdk-lib/aws-apigatewayv2";
+import { StackProps, Stack } from "aws-cdk-lib";
+import { HttpMethod, DomainName, HttpApi } from "aws-cdk-lib/aws-apigatewayv2";
 import { HttpUserPoolAuthorizer } from "aws-cdk-lib/aws-apigatewayv2-authorizers";
 import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
-import {
-  Certificate,
-  CertificateValidation,
-} from "aws-cdk-lib/aws-certificatemanager";
 import { UserPool, UserPoolClient } from "aws-cdk-lib/aws-cognito";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
-import { ARecord, HostedZone, RecordTarget } from "aws-cdk-lib/aws-route53";
-import { ApiGatewayv2DomainProperties } from "aws-cdk-lib/aws-route53-targets";
 import { Construct } from "constructs";
 import * as path from "path";
 
@@ -24,36 +12,12 @@ interface APIStackProps extends StackProps {
   appName: string;
   userPool: UserPool;
   appClient: UserPoolClient;
-  rootDomain: string;
+  gatewayDomain: DomainName;
 }
 
 export class APIStack extends Stack {
   constructor(scope: Construct, id: string, props: APIStackProps) {
     super(scope, id, props);
-
-    // Custom Domain
-    const apiDomainName = `api.${props.appName}.${props.rootDomain}`;
-
-    const hostedZone = HostedZone.fromLookup(this, "HostedZone", {
-      domainName: props.rootDomain,
-    });
-
-    const domainCertificate = new Certificate(
-      this,
-      `${props.appName}-Certificate`,
-      {
-        domainName: apiDomainName,
-        certificateName: `${props.appName}-Certificate`,
-        validation: CertificateValidation.fromDns(hostedZone),
-      }
-    );
-
-    // Custom domain for API
-    const gatewayDomain = new DomainName(this, `${props.appName}-DomainName`, {
-      domainName: apiDomainName,
-      certificate: domainCertificate,
-      endpointType: EndpointType.REGIONAL,
-    });
 
     // Security
     const apiAuthorizer = new HttpUserPoolAuthorizer(
@@ -65,26 +29,9 @@ export class APIStack extends Stack {
     // API
     const httpApi = new HttpApi(this, `${props.appName}-API`, {
       defaultAuthorizer: apiAuthorizer,
-      // defaultDomainMapping: {
-      //   domainName: gatewayDomain,
-      // },
-    });
-
-    // new ApiMapping(this, "ApiMapping", {
-    //   api: httpApi,
-    //   domainName: gatewayDomain,
-    // });
-
-    // route53 records
-    new ARecord(this, `${props.appName}-AliasRecord`, {
-      zone: hostedZone,
-      recordName: apiDomainName,
-      target: RecordTarget.fromAlias(
-        new ApiGatewayv2DomainProperties(
-          gatewayDomain.regionalDomainName,
-          gatewayDomain.regionalHostedZoneId
-        )
-      ),
+      defaultDomainMapping: {
+        domainName: props.gatewayDomain,
+      },
     });
 
     // Lambdas
