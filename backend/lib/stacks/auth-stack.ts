@@ -45,8 +45,8 @@ export class AuthStack extends Stack {
     // create app client
     this.appClient = this.userPool.addClient(`${props.appName}`, {
       userPoolClientName: `${props.appName}-WebAppClient`,
-      idTokenValidity: Duration.minutes(30),
-      accessTokenValidity: Duration.minutes(30),
+      idTokenValidity: Duration.minutes(15),
+      accessTokenValidity: Duration.minutes(15),
       refreshTokenValidity: Duration.minutes(60),
       authFlows: {
         userPassword: true,

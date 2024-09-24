@@ -4,6 +4,7 @@ import {
   DomainName,
   HttpApi,
   EndpointType,
+  ApiMapping,
 } from "aws-cdk-lib/aws-apigatewayv2";
 import { HttpUserPoolAuthorizer } from "aws-cdk-lib/aws-apigatewayv2-authorizers";
 import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
@@ -32,6 +33,7 @@ export class APIStack extends Stack {
 
     // Custom Domain
     const apiDomainName = `api.${props.appName}.${props.rootDomain}`;
+
     const hostedZone = HostedZone.fromLookup(this, "HostedZone", {
       domainName: props.rootDomain,
     });
@@ -53,6 +55,26 @@ export class APIStack extends Stack {
       endpointType: EndpointType.REGIONAL,
     });
 
+    // Security
+    const apiAuthorizer = new HttpUserPoolAuthorizer(
+      `${props.appName}-APIAuthorizer`,
+      props.userPool,
+      { userPoolClients: [props.appClient] }
+    );
+
+    // API
+    const httpApi = new HttpApi(this, `${props.appName}-API`, {
+      defaultAuthorizer: apiAuthorizer,
+      // defaultDomainMapping: {
+      //   domainName: gatewayDomain,
+      // },
+    });
+
+    // new ApiMapping(this, "ApiMapping", {
+    //   api: httpApi,
+    //   domainName: gatewayDomain,
+    // });
+
     // route53 records
     new ARecord(this, `${props.appName}-AliasRecord`, {
       zone: hostedZone,
@@ -64,20 +86,6 @@ export class APIStack extends Stack {
         )
       ),
     });
-
-    // Security
-    const apiAuthorizer = new HttpUserPoolAuthorizer(
-      `${props.appName}-APIAuthorizer`,
-      props.userPool,
-      { userPoolClients: [props.appClient] }
-    );
-
-    // API
-    const httpApi = new HttpApi(this, `${props.appName}-API`, {
-      defaultAuthorizer: apiAuthorizer,
-    });
-
-    new CfnOutput(this, "API Ednpoint", { value: httpApi.apiEndpoint });
 
     // Lambdas
     const testLambda = new NodejsFunction(this, `${props.appName}-TestLambda`, {
