@@ -46,7 +46,9 @@ export class StorageStack extends Stack {
     this.metaDataTable = table;
 
     const bucket = new Bucket(this, `${props.appName}-AssetBucket`, {
-      bucketName: `${props.appName}-asset-bucket-${this.account}-${this.region}`,
+      bucketName: `${props.appName.toLowerCase()}-asset-bucket-${
+        this.account
+      }-${this.region}`,
       accessControl: BucketAccessControl.PRIVATE,
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
       encryption: BucketEncryption.S3_MANAGED,
