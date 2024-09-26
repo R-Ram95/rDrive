@@ -10,6 +10,7 @@ import {
   Bucket,
   BucketAccessControl,
   BucketEncryption,
+  StorageClass,
 } from "aws-cdk-lib/aws-s3";
 import { Construct } from "constructs";
 
@@ -51,6 +52,17 @@ export class StorageStack extends Stack {
       encryption: BucketEncryption.S3_MANAGED,
       versioned: true,
       removalPolicy: RemovalPolicy.DESTROY, // TODO RETAIN ON PROD
+      lifecycleRules: [
+        {
+          noncurrentVersionExpiration: Duration.days(90),
+          transitions: [
+            {
+              storageClass: StorageClass.GLACIER,
+              transitionAfter: Duration.days(30),
+            },
+          ],
+        },
+      ],
     });
 
     this.assetBucket = bucket;
