@@ -3,8 +3,10 @@ import { HttpMethod, DomainName, HttpApi } from "aws-cdk-lib/aws-apigatewayv2";
 import { HttpUserPoolAuthorizer } from "aws-cdk-lib/aws-apigatewayv2-authorizers";
 import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 import { UserPool, UserPoolClient } from "aws-cdk-lib/aws-cognito";
+import { TableV2 } from "aws-cdk-lib/aws-dynamodb";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
+import { Bucket } from "aws-cdk-lib/aws-s3";
 import { Construct } from "constructs";
 import * as path from "path";
 
@@ -13,6 +15,8 @@ interface APIStackProps extends StackProps {
   userPool: UserPool;
   appClient: UserPoolClient;
   gatewayDomain: DomainName;
+  metaDataTable: TableV2;
+  assetStorage: Bucket;
 }
 
 export class APIStack extends Stack {
