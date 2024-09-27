@@ -36,12 +36,11 @@ const storageStack = new StorageStack(app, `${APP_NAME}-StorageStack`, {
   },
 });
 
-const apiStack = new APIStack(app, `${APP_NAME}-BackendStack`, {
+const apiStack = new APIStack(app, `${APP_NAME}-ApiStack`, {
   appName: APP_NAME,
   userPool: authStack.userPool,
   appClient: authStack.appClient,
   gatewayDomain: dnsStack.domainName,
-  metaDataTable: storageStack.metaDataTable,
   assetStorage: storageStack.assetBucket,
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,

@@ -3,7 +3,6 @@ import { HttpMethod, DomainName, HttpApi } from "aws-cdk-lib/aws-apigatewayv2";
 import { HttpUserPoolAuthorizer } from "aws-cdk-lib/aws-apigatewayv2-authorizers";
 import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 import { UserPool, UserPoolClient } from "aws-cdk-lib/aws-cognito";
-import { TableV2 } from "aws-cdk-lib/aws-dynamodb";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Bucket } from "aws-cdk-lib/aws-s3";
@@ -15,7 +14,6 @@ interface APIStackProps extends StackProps {
   userPool: UserPool;
   appClient: UserPoolClient;
   gatewayDomain: DomainName;
-  metaDataTable: TableV2;
   assetStorage: Bucket;
 }
 
@@ -46,6 +44,38 @@ export class APIStack extends Stack {
       entry: path.join(__dirname, "../lambdas/endpoints/test", "index.ts"),
     });
 
+    const imageUploadLambda = new NodejsFunction(
+      this,
+      `${props.appName}-ImageUploadLambda`,
+      {
+        runtime: Runtime.NODEJS_20_X,
+        handler: "handler",
+        functionName: `${props.appName}-image-upload-function`,
+        entry: path.join(
+          __dirname,
+          "../lambdas/image/image-upload",
+          "index.ts"
+        ),
+        environment: {
+          BUCKET_NAME: props.assetStorage.bucketName,
+          REGION: this.region,
+        },
+      }
+    );
+
+    props.assetStorage.grantReadWrite(imageUploadLambda);
+
+    const imageUploadIntegration = new HttpLambdaIntegration(
+      "SingleImageUploadIntegration",
+      imageUploadLambda
+    );
+
+    httpApi.addRoutes({
+      path: "/image",
+      methods: [HttpMethod.POST],
+      integration: imageUploadIntegration,
+    });
+
     // Registering routes
     const testLambdaIntegration = new HttpLambdaIntegration(
       "TestLambdaIntegration",
@@ -56,7 +86,6 @@ export class APIStack extends Stack {
       path: "/test",
       methods: [HttpMethod.GET],
       integration: testLambdaIntegration,
-      authorizer: apiAuthorizer,
     });
   }
 }
