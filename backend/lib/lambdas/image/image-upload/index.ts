@@ -1,6 +1,5 @@
 import {
   HeadObjectCommand,
-  NotFound,
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
@@ -17,7 +16,7 @@ export interface ObjectTags {
 export interface RequestBody {
   folderPath: string;
   fileName: string;
-  overWrite?: boolean;
+  overwrite?: boolean;
   metaData: ObjectTags;
 }
 
@@ -58,20 +57,20 @@ const checkIfImageExists = async ({ key }: { key: string }) => {
 async function uploadImage({
   folderPath,
   fileName,
-  overWrite = false,
+  overwrite = false,
   metaData,
 }: {
   folderPath: string;
   fileName: string;
   metaData: ObjectTags;
-  overWrite?: boolean;
+  overwrite?: boolean;
 }) {
   const key = `${folderPath}${fileName}`;
 
   try {
     const imageExists = await checkIfImageExists({ key });
 
-    if (imageExists && !overWrite) {
+    if (imageExists && !overwrite) {
       return {
         statusCode: 409,
         body: JSON.stringify({
@@ -109,7 +108,7 @@ async function uploadImage({
 export async function handler(event: APIGatewayEvent) {
   // check event request body for the fields we need RequestBody
   const requestBody: RequestBody = event.body ? JSON.parse(event.body) : {};
-  const { folderPath, fileName, metaData } = requestBody;
+  const { folderPath, fileName, metaData, overwrite } = requestBody;
 
   // check event request body for the fields we need RequestBody
   if (!folderPath || !fileName) {
@@ -119,5 +118,5 @@ export async function handler(event: APIGatewayEvent) {
     };
   }
 
-  return uploadImage({ folderPath, fileName, metaData });
+  return uploadImage({ folderPath, fileName, metaData, overwrite });
 }
