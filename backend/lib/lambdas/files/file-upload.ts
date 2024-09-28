@@ -31,7 +31,7 @@ export async function handler(event: APIGatewayEvent) {
       createResponse(409, "File already exits, you can overwrite it.");
     }
 
-    return createResponse(200, "Successfully generated presigned URL", {
+    return createResponse(200, "Request successful: presigned url generated", {
       presignedUrl: presignedUrl,
       fileName: file.fileName,
     });

@@ -72,6 +72,6 @@ export async function generateUploadUrl({
     return preSignedUrl;
   } catch (e: any) {
     console.error(e);
-    throw new Error("Failed to add file due to internal server error");
+    throw new Error("Request Failed: failed due to internal server error");
   }
 }

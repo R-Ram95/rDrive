@@ -34,7 +34,11 @@ export const handler = async (event: APIGatewayEvent) => {
       return { url: url, fileName: files[index].fileName };
     });
 
-    return createResponse(200, "Created presigned urls,", presignedUrls);
+    return createResponse(
+      200,
+      "Request sucessful: presigned urls generated",
+      presignedUrls
+    );
   } catch (e: any) {
     console.error(e);
     return createResponse(500, e.message);
