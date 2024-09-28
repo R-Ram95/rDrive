@@ -1,5 +1,9 @@
 import { APIGatewayProxyResultV2 } from "aws-lambda";
-import { File, UploadSingleRequestBody } from "./types";
+import {
+  File,
+  UploadMultipleRequestBody,
+  UploadSingleRequestBody,
+} from "./types";
 
 export function createResponse<T>(
   statusCode: number,
@@ -37,8 +41,27 @@ export function validateSingleUploadRequest(
   }
 
   const error = validateFile(file);
-  if (error) {
-    return error;
+  if (error) return error;
+
+  return null;
+}
+
+export function validateMultipleUploadRequest(
+  requestBody: UploadMultipleRequestBody
+) {
+  const { files, user } = requestBody;
+
+  if (!user) return "Upload user is required.";
+
+  if (!files || files.length < 1) {
+    return "Atleast 1 file is required required";
+  }
+
+  for (const file of files) {
+    const error = validateFile(file);
+    if (error) {
+      return error;
+    }
   }
 
   return null;
