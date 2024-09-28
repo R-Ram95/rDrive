@@ -39,6 +39,13 @@ const apiConfig = [
     methods: [HttpMethod.POST],
     permission: PERMISION.READ_WRITE,
   },
+  {
+    functionName: "ListDirectory",
+    endpoint: `/directory`,
+    entryFile: path.join(lambdasDir, "directory", "list-directory.ts"),
+    methods: [HttpMethod.GET],
+    permission: PERMISION.READ,
+  },
 ];
 
 export class APIStack extends Stack {
