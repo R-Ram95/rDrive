@@ -22,9 +22,6 @@ export function createResponse<T>(
 function validateFile(file: File): string | null {
   if (!file.folderPath) return "folderPath is required";
   if (!file.fileName) return "fileName is required";
-  if (!file.fileType) return "fileType is required";
-  if (typeof file.fileSize !== "number" || file.fileSize <= 0)
-    return "fileSize must be a positive number";
 
   return null;
 }
