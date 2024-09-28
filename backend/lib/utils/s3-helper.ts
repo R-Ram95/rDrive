@@ -12,7 +12,7 @@ export async function createURL({ command }: { command: PutObjectCommand }) {
   return await getSignedUrl(s3Client, command, { expiresIn: 360 }); // 5 Minutes
 }
 
-export async function checkIfFileExists({
+export async function checkIfObjectExists({
   bucketName,
   key,
 }: {
@@ -54,7 +54,7 @@ export async function generateUploadUrl({
 
   try {
     if (!overwrite) {
-      const fileExists = await checkIfFileExists({
+      const fileExists = await checkIfObjectExists({
         bucketName,
         key,
       });

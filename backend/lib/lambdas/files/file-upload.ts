@@ -37,6 +37,6 @@ export async function handler(event: APIGatewayEvent) {
     });
   } catch (e: any) {
     console.error(e);
-    return createResponse(500, e.message);
+    return createResponse(500, `Server error: ${e.message}`);
   }
 }
