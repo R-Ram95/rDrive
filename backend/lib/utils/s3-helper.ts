@@ -43,12 +43,10 @@ export async function generateUploadUrl({
   bucketName,
   overwrite = false,
 }: GeneratePresignedUrlArgs) {
-  const { folderPath, fileName, fileType, fileSize } = file;
+  const { folderPath, fileName } = file;
   const key = `${folderPath}${fileName}`;
 
   const metaData = {
-    FileSize: fileSize.toString(),
-    FileType: fileType,
     UploadUser: user,
   };
 

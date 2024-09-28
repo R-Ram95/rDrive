@@ -1,8 +1,6 @@
 export interface File {
   folderPath: string;
   fileName: string;
-  fileType: string;
-  fileSize: number;
   overwrite?: boolean;
 }
 
