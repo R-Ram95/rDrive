@@ -1,4 +1,5 @@
 import {
+  GetObjectCommand,
   HeadObjectCommand,
   PutObjectCommand,
   S3Client,
@@ -8,7 +9,11 @@ import { GeneratePresignedUrlArgs } from "./types";
 
 const s3Client = new S3Client({ region: process.env.REGION });
 
-export async function createURL({ command }: { command: PutObjectCommand }) {
+export async function createURL({
+  command,
+}: {
+  command: PutObjectCommand | GetObjectCommand;
+}) {
   return await getSignedUrl(s3Client, command, { expiresIn: 360 }); // 5 Minutes
 }
 
