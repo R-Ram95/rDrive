@@ -12,7 +12,7 @@ export async function createURL({ command }: { command: PutObjectCommand }) {
   return await getSignedUrl(s3Client, command, { expiresIn: 360 }); // 5 Minutes
 }
 
-export async function checkIfImageExists({
+export async function checkIfFileExists({
   bucketName,
   key,
 }: {
@@ -54,11 +54,11 @@ export async function generateUploadUrl({
 
   try {
     if (!overwrite) {
-      const imageExists = await checkIfImageExists({
+      const fileExists = await checkIfFileExists({
         bucketName,
         key,
       });
-      if (imageExists) return null;
+      if (fileExists) return null;
     }
 
     const command = new PutObjectCommand({
@@ -72,6 +72,6 @@ export async function generateUploadUrl({
     return preSignedUrl;
   } catch (e: any) {
     console.error(e);
-    throw new Error("Failed to add image due to internal server error");
+    throw new Error("Failed to add file due to internal server error");
   }
 }

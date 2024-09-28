@@ -28,7 +28,7 @@ export async function handler(event: APIGatewayEvent) {
     });
 
     if (!presignedUrl) {
-      createResponse(409, "Image already exits, you can overwrite it.");
+      createResponse(409, "File already exits, you can overwrite it.");
     }
 
     return createResponse(200, "Successfully generated presigned URL", {
