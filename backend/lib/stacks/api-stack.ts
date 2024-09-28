@@ -40,6 +40,13 @@ const apiConfig = [
     permission: PERMISION.READ_WRITE,
   },
   {
+    functionName: "CreateFolder",
+    endpoint: `/directory`,
+    entryFile: path.join(lambdasDir, "directory", "create-directory.ts"),
+    methods: [HttpMethod.POST],
+    permission: PERMISION.READ_WRITE,
+  },
+  {
     functionName: "ListDirectory",
     endpoint: `/directory`,
     entryFile: path.join(lambdasDir, "directory", "list-directory.ts"),
