@@ -17,6 +17,23 @@ interface APIStackProps extends StackProps {
   assetStorage: Bucket;
 }
 
+enum PERMISION {
+  READ = "READ",
+  WRITE = "WRITE",
+  READ_WRITE = "READ-WRITE",
+}
+
+const lambdasDir = path.join(__dirname, "../lambdas");
+const apiConfig = [
+  {
+    functionName: "UploadSingleImage",
+    endpoint: `/images`,
+    entryFile: path.join(lambdasDir, "images", "upload-single-image.ts"),
+    methods: [HttpMethod.POST],
+    permission: PERMISION.READ_WRITE,
+  },
+];
+
 export class APIStack extends Stack {
   constructor(scope: Construct, id: string, props: APIStackProps) {
     super(scope, id, props);
@@ -36,56 +53,41 @@ export class APIStack extends Stack {
       },
     });
 
-    // Lambdas
-    const testLambda = new NodejsFunction(this, `${props.appName}-TestLambda`, {
-      runtime: Runtime.NODEJS_20_X,
-      handler: "handler",
-      functionName: `${props.appName}-test-function`,
-      entry: path.join(__dirname, "../lambdas/endpoints/test", "index.ts"),
-    });
+    apiConfig.forEach(
+      ({ functionName, endpoint, entryFile, methods, permission }) => {
+        // create lambda
+        const lambda = new NodejsFunction(
+          this,
+          `${props.appName}-${functionName}`,
+          {
+            runtime: Runtime.NODEJS_20_X,
+            handler: "handler",
+            functionName: `${props.appName}-${functionName}`,
+            entry: entryFile,
+            environment: {
+              BUCKET_NAME: props.assetStorage.bucketName,
+              REGION: this.region,
+            },
+          }
+        );
+        // grant permissions
+        permission === PERMISION.READ_WRITE &&
+          props.assetStorage.grantReadWrite(lambda);
+        permission === PERMISION.READ && props.assetStorage.grantRead(lambda);
+        permission === PERMISION.WRITE && props.assetStorage.grantWrite(lambda);
 
-    const imageUploadLambda = new NodejsFunction(
-      this,
-      `${props.appName}-ImageUploadLambda`,
-      {
-        runtime: Runtime.NODEJS_20_X,
-        handler: "handler",
-        functionName: `${props.appName}-image-upload-function`,
-        entry: path.join(
-          __dirname,
-          "../lambdas/image/image-upload",
-          "index.ts"
-        ),
-        environment: {
-          BUCKET_NAME: props.assetStorage.bucketName,
-          REGION: this.region,
-        },
+        // create integration
+        const integration = new HttpLambdaIntegration(
+          `${functionName}Integration`,
+          lambda
+        );
+        // add route
+        httpApi.addRoutes({
+          path: endpoint,
+          methods,
+          integration,
+        });
       }
     );
-
-    props.assetStorage.grantReadWrite(imageUploadLambda);
-
-    const imageUploadIntegration = new HttpLambdaIntegration(
-      "SingleImageUploadIntegration",
-      imageUploadLambda
-    );
-
-    httpApi.addRoutes({
-      path: "/image",
-      methods: [HttpMethod.POST],
-      integration: imageUploadIntegration,
-    });
-
-    // Registering routes
-    const testLambdaIntegration = new HttpLambdaIntegration(
-      "TestLambdaIntegration",
-      testLambda
-    );
-
-    httpApi.addRoutes({
-      path: "/test",
-      methods: [HttpMethod.GET],
-      integration: testLambdaIntegration,
-    });
   }
 }
