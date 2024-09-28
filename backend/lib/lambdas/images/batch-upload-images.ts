@@ -20,21 +20,19 @@ export const handler = async (event: APIGatewayEvent) => {
   const { files, user } = requestBody;
 
   try {
-    const presignedUrls = await Promise.all(
-      files.map((file) => {
-        const presignedUrl = generateUploadUrl({
-          file: file,
-          user: user,
-          bucketName: bucketName,
-          overwrite: file.overwrite,
-        });
+    const promises = files.map((file) => {
+      return generateUploadUrl({
+        file: file,
+        user: user,
+        bucketName: bucketName,
+        overwrite: file.overwrite,
+      });
+    });
 
-        return {
-          presignedUrl: presignedUrl ?? "Image already exists, make a copy",
-          fileName: file.fileName,
-        };
-      })
-    );
+    const urlList = await Promise.all(promises);
+    const presignedUrls = urlList.map((url, index) => {
+      return { url: url, fileName: files[index].fileName };
+    });
 
     return createResponse(200, "Created presigned urls,", presignedUrls);
   } catch (e: any) {

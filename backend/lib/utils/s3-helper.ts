@@ -23,6 +23,7 @@ export async function checkIfImageExists({
     Bucket: bucketName,
     Key: key,
   };
+  console.log(bucketName);
 
   try {
     await s3Client.send(new HeadObjectCommand(params));

@@ -26,9 +26,16 @@ enum PERMISION {
 const lambdasDir = path.join(__dirname, "../lambdas");
 const apiConfig = [
   {
-    functionName: "UploadSingleImage",
+    functionName: "UploadImage",
     endpoint: `/images`,
-    entryFile: path.join(lambdasDir, "images", "upload-single-image.ts"),
+    entryFile: path.join(lambdasDir, "images", "upload-image.ts"),
+    methods: [HttpMethod.POST],
+    permission: PERMISION.READ_WRITE,
+  },
+  {
+    functionName: "BatchUploadImage",
+    endpoint: `/images/batch`,
+    entryFile: path.join(lambdasDir, "images", "batch-upload-images.ts"),
     methods: [HttpMethod.POST],
     permission: PERMISION.READ_WRITE,
   },
