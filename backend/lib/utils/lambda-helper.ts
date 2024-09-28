@@ -19,7 +19,7 @@ export function createResponse<T>(
   };
 }
 
-function validateFile(file: File): string | null {
+export function validateFile(file: File): string | null {
   if (!file.folderPath) return "folderPath is required";
   if (!file.fileName) return "fileName is required";
 
@@ -34,7 +34,7 @@ export function validateSingleUploadRequest(
   if (!user) return "Upload user is required.";
 
   if (!file) {
-    return "file is requireda";
+    return "file is required";
   }
 
   const error = validateFile(file);
