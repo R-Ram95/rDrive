@@ -1,14 +1,29 @@
-# Welcome to your CDK TypeScript project
+# Infrastructure
 
-This is a blank project for CDK development with TypeScript.
+TODO
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+# APIs
 
-## Useful commands
+GET: `/files`
 
-* `npm run build`   compile typescript to js
-* `npm run watch`   watch for changes and compile
-* `npm run test`    perform the jest unit tests
-* `cdk deploy`      deploy this stack to your default AWS account/region
-* `cdk diff`        compare deployed stack with current state
-* `cdk synth`       emits the synthesized CloudFormation template
+- downloads a single file
+
+POST: `/files`
+
+- uploads a single file
+
+GET: `/files/batch`
+
+- downloads multiple files
+
+POST: `/files/batch`
+
+- uploads multiple files
+
+GET: `/directory`
+
+- lists all files and folders of a given directory
+
+POST: `/directory`
+
+- creates a folder in the given directory
