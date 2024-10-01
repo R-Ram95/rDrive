@@ -3,7 +3,6 @@ import { HttpMethod, DomainName, HttpApi } from "aws-cdk-lib/aws-apigatewayv2";
 import { HttpUserPoolAuthorizer } from "aws-cdk-lib/aws-apigatewayv2-authorizers";
 import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 import { UserPool, UserPoolClient } from "aws-cdk-lib/aws-cognito";
-import { TableV2 } from "aws-cdk-lib/aws-dynamodb";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Bucket } from "aws-cdk-lib/aws-s3";
@@ -15,9 +14,60 @@ interface APIStackProps extends StackProps {
   userPool: UserPool;
   appClient: UserPoolClient;
   gatewayDomain: DomainName;
-  metaDataTable: TableV2;
   assetStorage: Bucket;
 }
+
+enum PERMISION {
+  READ = "READ",
+  WRITE = "WRITE",
+  READ_WRITE = "READ-WRITE",
+}
+
+const lambdasDir = path.join(__dirname, "../lambdas");
+const apiConfig = [
+  {
+    functionName: "FileUpload",
+    endpoint: `/files`,
+    entryFile: path.join(lambdasDir, "files", "file-upload.ts"),
+    methods: [HttpMethod.POST],
+    permission: PERMISION.READ_WRITE,
+  },
+  {
+    functionName: "FileDownload",
+    endpoint: `/files`,
+    entryFile: path.join(lambdasDir, "files", "file-download.ts"),
+    methods: [HttpMethod.GET],
+    permission: PERMISION.READ,
+  },
+  {
+    functionName: "BatchFileUpload",
+    endpoint: `/files/batch`,
+    entryFile: path.join(lambdasDir, "files", "file-upload-batch.ts"),
+    methods: [HttpMethod.POST],
+    permission: PERMISION.READ_WRITE,
+  },
+  {
+    functionName: "BatchFileDownload",
+    endpoint: `/files/batch`,
+    entryFile: path.join(lambdasDir, "files", "file-download-batch.ts"),
+    methods: [HttpMethod.GET],
+    permission: PERMISION.READ,
+  },
+  {
+    functionName: "CreateFolder",
+    endpoint: `/directory`,
+    entryFile: path.join(lambdasDir, "directory", "create-directory.ts"),
+    methods: [HttpMethod.POST],
+    permission: PERMISION.READ_WRITE,
+  },
+  {
+    functionName: "ListDirectory",
+    endpoint: `/directory`,
+    entryFile: path.join(lambdasDir, "directory", "list-directory.ts"),
+    methods: [HttpMethod.GET],
+    permission: PERMISION.READ,
+  },
+];
 
 export class APIStack extends Stack {
   constructor(scope: Construct, id: string, props: APIStackProps) {
@@ -38,25 +88,41 @@ export class APIStack extends Stack {
       },
     });
 
-    // Lambdas
-    const testLambda = new NodejsFunction(this, `${props.appName}-TestLambda`, {
-      runtime: Runtime.NODEJS_20_X,
-      handler: "handler",
-      functionName: `${props.appName}-test-function`,
-      entry: path.join(__dirname, "../lambdas/endpoints/test", "index.ts"),
-    });
+    apiConfig.forEach(
+      ({ functionName, endpoint, entryFile, methods, permission }) => {
+        // create lambda
+        const lambda = new NodejsFunction(
+          this,
+          `${props.appName}-${functionName}`,
+          {
+            runtime: Runtime.NODEJS_20_X,
+            handler: "handler",
+            functionName: `${props.appName}-${functionName}`,
+            entry: entryFile,
+            environment: {
+              BUCKET_NAME: props.assetStorage.bucketName,
+              REGION: this.region,
+            },
+          }
+        );
+        // grant permissions
+        permission === PERMISION.READ_WRITE &&
+          props.assetStorage.grantReadWrite(lambda);
+        permission === PERMISION.READ && props.assetStorage.grantRead(lambda);
+        permission === PERMISION.WRITE && props.assetStorage.grantWrite(lambda);
 
-    // Registering routes
-    const testLambdaIntegration = new HttpLambdaIntegration(
-      "TestLambdaIntegration",
-      testLambda
+        // create integration
+        const integration = new HttpLambdaIntegration(
+          `${functionName}Integration`,
+          lambda
+        );
+        // add route
+        httpApi.addRoutes({
+          path: endpoint,
+          methods,
+          integration,
+        });
+      }
     );
-
-    httpApi.addRoutes({
-      path: "/test",
-      methods: [HttpMethod.GET],
-      integration: testLambdaIntegration,
-      authorizer: apiAuthorizer,
-    });
   }
 }

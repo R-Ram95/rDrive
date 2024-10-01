@@ -1,4 +1,3 @@
-*.js
 !jest.config.js
 *.d.ts
 node_modules
@@ -10,3 +9,4 @@ cdk.out
 # environment variables
 .env
 cdk.context.json
+dev.journal.md
