@@ -1,5 +1,5 @@
 import { APIGatewayEvent } from "aws-lambda";
-import { generateFileResponse } from "../../utils/s3-helper";
+import { generateFileUploadUrl } from "../../utils/s3-helper";
 import {
   createResponse,
   validateSingleUploadRequest,
@@ -20,17 +20,17 @@ export async function handler(event: APIGatewayEvent) {
   const { overwrite } = file;
 
   try {
-    const fileResponse = await generateFileResponse({
-      file,
-      user,
-      bucketName,
-      overwrite,
+    const uploadUrl = await generateFileUploadUrl({
+      file: file,
+      user: user,
+      bucketName: bucketName,
+      overwrite: overwrite,
     });
 
-    return createResponse(200, fileResponse.message, {
-      fileName: file.fileName,
-      status: fileResponse.status,
-      url: fileResponse.url,
+    return createResponse(200, uploadUrl.message, {
+      fileName: uploadUrl.fileName,
+      status: uploadUrl.status,
+      url: uploadUrl.url,
     });
   } catch (e: any) {
     console.error(e);
