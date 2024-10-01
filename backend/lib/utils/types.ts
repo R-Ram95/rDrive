@@ -20,3 +20,8 @@ export interface UploadMultipleRequestBody {
   files: File[];
   user: string;
 }
+
+export enum FILE_STATUS {
+  CONFLICT = "CONFLICT",
+  CREATED = "CREATED",
+}

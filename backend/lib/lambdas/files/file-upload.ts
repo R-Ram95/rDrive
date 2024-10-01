@@ -1,5 +1,5 @@
 import { APIGatewayEvent } from "aws-lambda";
-import { generateUploadUrl } from "../../utils/s3-helper";
+import { generateFileResponse } from "../../utils/s3-helper";
 import {
   createResponse,
   validateSingleUploadRequest,
@@ -20,20 +20,17 @@ export async function handler(event: APIGatewayEvent) {
   const { overwrite } = file;
 
   try {
-    const presignedUrl = await generateUploadUrl({
+    const fileResponse = await generateFileResponse({
       file,
       user,
       bucketName,
       overwrite,
     });
 
-    if (!presignedUrl) {
-      createResponse(409, "File already exits, you can overwrite it.");
-    }
-
-    return createResponse(200, "Request successful: presigned url generated", {
-      presignedUrl: presignedUrl,
+    return createResponse(200, fileResponse.message, {
       fileName: file.fileName,
+      status: fileResponse.status,
+      url: fileResponse.url,
     });
   } catch (e: any) {
     console.error(e);

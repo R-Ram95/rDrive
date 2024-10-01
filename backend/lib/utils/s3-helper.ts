@@ -5,7 +5,7 @@ import {
   S3Client,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { GeneratePresignedUrlArgs } from "./types";
+import { FILE_STATUS, GeneratePresignedUrlArgs } from "./types";
 
 const s3Client = new S3Client({ region: process.env.REGION });
 
@@ -42,7 +42,7 @@ export async function checkIfObjectExists({
   }
 }
 
-export async function generateUploadUrl({
+export async function generateFileResponse({
   file,
   user,
   bucketName,
@@ -61,7 +61,13 @@ export async function generateUploadUrl({
         bucketName,
         key,
       });
-      if (fileExists) return null;
+      if (fileExists)
+        return {
+          fileName: file.fileName,
+          status: FILE_STATUS.CONFLICT,
+          message: "File already exists, you can overwrite it.",
+          url: "",
+        };
     }
 
     const command = new PutObjectCommand({
@@ -72,7 +78,13 @@ export async function generateUploadUrl({
 
     // generate presigned URL
     const preSignedUrl = await createURL({ command });
-    return preSignedUrl;
+
+    return {
+      fileName: file.fileName,
+      status: FILE_STATUS.CREATED,
+      message: "Request successful: presigned url generated",
+      url: preSignedUrl,
+    };
   } catch (e: any) {
     console.error(e);
     throw new Error("Request Failed: failed due to internal server error");

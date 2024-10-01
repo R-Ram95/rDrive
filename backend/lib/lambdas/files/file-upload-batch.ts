@@ -4,7 +4,7 @@ import {
   createResponse,
   validateMultipleUploadRequest,
 } from "../../utils/lambda-helper";
-import { generateUploadUrl } from "../../utils/s3-helper";
+import { generateFileResponse } from "../../utils/s3-helper";
 
 const bucketName = process.env.BUCKET_NAME;
 
@@ -21,7 +21,7 @@ export const handler = async (event: APIGatewayEvent) => {
 
   try {
     const promises = files.map((file) => {
-      return generateUploadUrl({
+      return generateFileResponse({
         file: file,
         user: user,
         bucketName: bucketName,
@@ -29,9 +29,14 @@ export const handler = async (event: APIGatewayEvent) => {
       });
     });
 
-    const urlList = await Promise.all(promises);
-    const presignedUrls = urlList.map((url, index) => {
-      return { url: url, fileName: files[index].fileName };
+    const fileResponseList = await Promise.all(promises);
+    const presignedUrls = fileResponseList.map((response) => {
+      return {
+        fileName: response.fileName,
+        message: response.message,
+        status: response.status,
+        url: response.url,
+      };
     });
 
     return createResponse(

@@ -10,3 +10,4 @@ cdk.out
 # environment variables
 .env
 cdk.context.json
+dev.journal.md
