@@ -47,6 +47,13 @@ const apiConfig = [
     permission: PERMISION.READ_WRITE,
   },
   {
+    functionName: "BatchFileDownload",
+    endpoint: `/files/batch`,
+    entryFile: path.join(lambdasDir, "files", "file-download-batch.ts"),
+    methods: [HttpMethod.GET],
+    permission: PERMISION.READ,
+  },
+  {
     functionName: "CreateFolder",
     endpoint: `/directory`,
     entryFile: path.join(lambdasDir, "directory", "create-directory.ts"),

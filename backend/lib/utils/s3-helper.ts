@@ -1,28 +1,26 @@
 import {
   GetObjectCommand,
+  GetObjectRequest,
   HeadObjectCommand,
   PutObjectCommand,
+  PutObjectRequest,
   S3Client,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { FILE_STATUS, GeneratePresignedUrlArgs } from "./types";
+import {
+  FILE_STATUS,
+  GenerateFileDownloadUrlArgs,
+  GenerateFileUploadUrlArgs,
+} from "./types";
 
 const s3Client = new S3Client({ region: process.env.REGION });
 
-export async function createURL({
-  command,
-}: {
-  command: PutObjectCommand | GetObjectCommand;
-}) {
-  return await getSignedUrl(s3Client, command, { expiresIn: 360 }); // 5 Minutes
-}
-
 export async function checkIfObjectExists({
-  bucketName,
   key,
+  bucketName,
 }: {
-  bucketName: string | undefined;
   key: string;
+  bucketName: string | undefined;
 }) {
   const params = {
     Bucket: bucketName,
@@ -42,18 +40,17 @@ export async function checkIfObjectExists({
   }
 }
 
-export async function generateFileResponse({
+export async function generateFileUploadUrl({
   file,
-  user,
   bucketName,
+  user,
   overwrite = false,
-}: GeneratePresignedUrlArgs) {
-  const { folderPath, fileName } = file;
-  const key = `${folderPath}${fileName}`;
-
-  const metaData = {
-    UploadUser: user,
-  };
+}: GenerateFileUploadUrlArgs) {
+  const { fileName, folderPath } = file;
+  const key =
+    folderPath === "/"
+      ? `${folderPath}${fileName}`
+      : `${folderPath}/${fileName}`;
 
   try {
     if (!overwrite) {
@@ -63,24 +60,72 @@ export async function generateFileResponse({
       });
       if (fileExists)
         return {
-          fileName: file.fileName,
+          fileName: fileName,
           status: FILE_STATUS.CONFLICT,
           message: "File already exists, you can overwrite it.",
           url: "",
         };
     }
 
-    const command = new PutObjectCommand({
+    const inputCommand: PutObjectRequest = {
       Bucket: bucketName,
       Key: key,
-      Metadata: metaData,
-    });
+      Metadata: {
+        User: user,
+      },
+    };
+
+    const command = new PutObjectCommand(inputCommand);
 
     // generate presigned URL
-    const preSignedUrl = await createURL({ command });
+    const preSignedUrl = await getSignedUrl(s3Client, command, {
+      expiresIn: 360,
+    }); // 5 Minutes
 
     return {
-      fileName: file.fileName,
+      fileName: fileName,
+      status: FILE_STATUS.CREATED,
+      message: "Request successful: presigned url generated",
+      url: preSignedUrl,
+    };
+  } catch (e: any) {
+    console.error(e);
+    throw new Error("Request Failed: failed due to internal server error");
+  }
+}
+
+export async function generateFileDownloaddUrl({
+  fileKey,
+  bucketName,
+}: GenerateFileDownloadUrlArgs) {
+  try {
+    const fileExists = await checkIfObjectExists({
+      key: fileKey,
+      bucketName,
+    });
+
+    if (!fileExists)
+      return {
+        fileKey: fileKey,
+        status: FILE_STATUS.CONFLICT,
+        message: `File with key ${fileKey} does not exist`,
+        url: "",
+      };
+
+    const inputCommand: GetObjectRequest = {
+      Bucket: bucketName,
+      Key: fileKey,
+    };
+
+    const command = new GetObjectCommand(inputCommand);
+
+    // generate presigned URL
+    const preSignedUrl = await getSignedUrl(s3Client, command, {
+      expiresIn: 720,
+    }); // 5 Minutes
+
+    return {
+      fileKey: fileKey,
       status: FILE_STATUS.CREATED,
       message: "Request successful: presigned url generated",
       url: preSignedUrl,

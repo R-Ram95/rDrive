@@ -1,14 +1,21 @@
+import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+
 export interface File {
   folderPath: string;
   fileName: string;
   overwrite?: boolean;
 }
 
-export interface GeneratePresignedUrlArgs {
+export interface GenerateFileUploadUrlArgs {
   file: File;
-  user: string;
   bucketName: string | undefined;
+  user: string;
   overwrite?: boolean;
+}
+
+export interface GenerateFileDownloadUrlArgs {
+  fileKey: string;
+  bucketName: string | undefined;
 }
 
 export interface UploadSingleRequestBody {
