@@ -3,8 +3,7 @@
 @tailwind utilities;
 
 :root {
-  font-family: 'Montserrat', Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  color-scheme: light dark;
+  font-family: 'Montserrat',  system-ui, Avenir, Helvetica, Arial, sans-serif;  
 }
 
 
