@@ -1,8 +1,55 @@
+import { signIn } from "aws-amplify/auth";
+import { ChangeEvent, FormEvent, useState } from "react";
+import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+
+interface SignInFormElements extends HTMLFormControlsCollection {
+  username: HTMLInputElement;
+  password: HTMLInputElement;
+}
+
+interface SignInForm extends HTMLFormElement {
+  readonly elements: SignInFormElements;
+}
+
 const Login = () => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (event: FormEvent<SignInForm>) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+
+    if (!username) {
+      alert("username is required");
+      return;
+    }
+
+    if (!password) {
+      alert("password is required");
+      return;
+    }
+
+    try {
+      const response = await signIn({
+        username: form.elements.username.value,
+        password: form.elements.password.value,
+      });
+
+      login();
+      navigate("/dashboard");
+      console.log(response);
+    } catch (e) {
+      console.error("Error signing in:", e);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center h-screen justify-center bg-[url('/image.png')] bg-cover bg-no-repeat bg-center">
       <div className="flex flex-col w-96 py-20 px-11 rounded-xl bg-transparent border border-white/20 backdrop-blur-lg shadow-2xl font-medium">
-        <form action="">
+        <form onSubmit={handleSubmit}>
           <h1 className="text-3xl text-center text-white font-semibold">
             r/Drive
           </h1>
@@ -13,6 +60,9 @@ const Login = () => {
               name="username"
               placeholder="Username"
               required
+              onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                setUsername(event.target.value)
+              }
             />
             <i className="bx bxs-user absolute right-3 top-1/2 -translate-y-1/2 size-4"></i>
           </div>
@@ -22,6 +72,9 @@ const Login = () => {
               type="password"
               name="password"
               placeholder="Password"
+              onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                setPassword(event.currentTarget.value)
+              }
             />
             <i className="bx bxs-lock-alt absolute right-3 top-1/2 -translate-y-1/2 size-4"></i>
           </div>
