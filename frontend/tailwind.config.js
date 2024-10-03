@@ -13,6 +13,9 @@ export default {
           "sans-serif",
         ],
       },
+      colors: {
+        "custom-blue": "#26223c",
+      },
     },
   },
   plugins: [],
