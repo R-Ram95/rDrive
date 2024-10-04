@@ -9,7 +9,6 @@ import {
 const s3Client = new S3Client({ region: process.env.REGION });
 const bucketName = process.env.BUCKET_NAME;
 
-// /api/images?parentFolder={parentFolder}
 export async function handler(event: APIGatewayEvent) {
   if (!event.queryStringParameters)
     return createResponse(
@@ -20,7 +19,7 @@ export async function handler(event: APIGatewayEvent) {
 
   const commandInput: ListObjectsV2Request = {
     Bucket: bucketName,
-    Delimiter: parentFolder ?? "/",
+    Delimiter: "/",
     Prefix: parentFolder,
   };
 
@@ -33,7 +32,9 @@ export async function handler(event: APIGatewayEvent) {
     // TODO: Clean up the mapping and logic
     const files =
       response.Contents && response.Contents.length > 0
-        ? response.Contents.map((content) => {
+        ? response.Contents.filter(
+            (content) => content.Size && content.Size > 0
+          ).map((content) => {
             return {
               fileKey: content.Key,
               fileName: content.Key?.split("/").slice(-1).pop(),
@@ -42,12 +43,13 @@ export async function handler(event: APIGatewayEvent) {
             };
           })
         : [];
-
-    // TODO: Clean up the mapping and logic
     const subFolders =
       response.CommonPrefixes && response.CommonPrefixes.length > 0
         ? response.CommonPrefixes.map((prefix) => {
-            return prefix.Prefix;
+            return (
+              prefix.Prefix &&
+              prefix.Prefix.replace(parentFolder!, "/").slice(1, -1)
+            );
           })
         : [];
 

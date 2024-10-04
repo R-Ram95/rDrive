@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { callApi } from "../utils/callApi";
-import { HTTP_METHOD } from "../utils/enums";
-import { DirectoryType } from "../utils/types";
+import { callApi } from "@/lib/callApi";
+import { HTTP_METHOD } from "@/lib/enums";
+import { DirectoryType } from "@/lib/types";
 
 const getDirectory = async (parentFolder: string): Promise<DirectoryType> => {
   const route = `/directory?parentFolder=${parentFolder}`;
