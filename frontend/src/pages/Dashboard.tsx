@@ -1,3 +1,4 @@
+import FileViewer from "../components/FileViewer";
 import { useAuth } from "../hooks/useAuth";
 
 const Dashboard = () => {
@@ -13,9 +14,7 @@ const Dashboard = () => {
         </div>
       </header>
       <div className="flex items-center h-[calc(100vh-4rem)]">
-        <div className="text-white m-5 border w-full h-full border-dotted border-white">
-          File View Area
-        </div>
+        <FileViewer />
       </div>
     </div>
   );
