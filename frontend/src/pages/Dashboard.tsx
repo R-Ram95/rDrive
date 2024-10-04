@@ -1,8 +1,9 @@
-import FileViewer from "../components/FileViewer";
-import { useAuth } from "../hooks/useAuth";
+import FileViewer from "@/components/FileViewer";
+import { useAuth } from "@/hooks/useAuth";
 
 const Dashboard = () => {
   const { logout } = useAuth();
+
   return (
     <div className="h-full overflow-clip bg-custom-blue">
       <header className="flex justify-between  px-10 py-4 bg-cover bg-[url('/image.jpeg')]">
