@@ -1,5 +1,10 @@
 import { StackProps, Stack } from "aws-cdk-lib";
-import { HttpMethod, DomainName, HttpApi } from "aws-cdk-lib/aws-apigatewayv2";
+import {
+  HttpMethod,
+  DomainName,
+  HttpApi,
+  CorsHttpMethod,
+} from "aws-cdk-lib/aws-apigatewayv2";
 import { HttpUserPoolAuthorizer } from "aws-cdk-lib/aws-apigatewayv2-authorizers";
 import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 import { UserPool, UserPoolClient } from "aws-cdk-lib/aws-cognito";
@@ -82,9 +87,19 @@ export class APIStack extends Stack {
 
     // API
     const httpApi = new HttpApi(this, `${props.appName}-API`, {
-      defaultAuthorizer: apiAuthorizer,
       defaultDomainMapping: {
         domainName: props.gatewayDomain,
+      },
+      corsPreflight: {
+        allowOrigins: ["http://localhost:3000"],
+        allowMethods: [
+          CorsHttpMethod.GET,
+          CorsHttpMethod.PUT,
+          CorsHttpMethod.POST,
+          CorsHttpMethod.DELETE,
+          CorsHttpMethod.OPTIONS,
+        ],
+        allowHeaders: ["Authorization", "Origin"],
       },
     });
 
@@ -121,8 +136,25 @@ export class APIStack extends Stack {
           path: endpoint,
           methods,
           integration,
+          authorizer: apiAuthorizer,
         });
       }
     );
+
+    // CORS
+    const lambda = new NodejsFunction(this, `${props.appName}-Cors`, {
+      runtime: Runtime.NODEJS_20_X,
+      handler: "handler",
+      functionName: `${props.appName}-Cors`,
+      entry: path.join(__dirname, "../lambdas/cors/index.ts"),
+    });
+
+    const integration = new HttpLambdaIntegration(`CorsIntegration`, lambda);
+
+    httpApi.addRoutes({
+      path: "/{proxy+}",
+      methods: [HttpMethod.OPTIONS],
+      integration,
+    });
   }
 }

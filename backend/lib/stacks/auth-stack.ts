@@ -50,6 +50,7 @@ export class AuthStack extends Stack {
       refreshTokenValidity: Duration.minutes(60),
       authFlows: {
         userPassword: true,
+        userSrp: true,
       },
       generateSecret: false,
     });
