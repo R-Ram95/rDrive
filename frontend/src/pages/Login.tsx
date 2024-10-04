@@ -39,7 +39,7 @@ const Login = () => {
       });
 
       login();
-      navigate("/dashboard");
+      navigate("/");
       console.log(response);
     } catch (e) {
       console.error("Error signing in:", e);
