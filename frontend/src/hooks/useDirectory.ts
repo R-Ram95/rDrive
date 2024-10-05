@@ -95,6 +95,7 @@ export const useUploadFile = () => {
       toast({
         title: `Failed to upload ${variables.fileName}`,
         description: error.message,
+        variant: "destructive",
       });
     },
   });

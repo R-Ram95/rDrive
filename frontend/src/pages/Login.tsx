@@ -2,6 +2,7 @@ import { signIn } from "aws-amplify/auth";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/useToast";
 
 interface SignInFormElements extends HTMLFormControlsCollection {
   username: HTMLInputElement;
@@ -16,6 +17,7 @@ const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const { login } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleSubmit = async (event: FormEvent<SignInForm>) => {
@@ -23,12 +25,18 @@ const Login = () => {
     const form = event.currentTarget;
 
     if (!username) {
-      alert("username is required");
+      toast({
+        title: "Username is required",
+        variant: "destructive",
+      });
       return;
     }
 
     if (!password) {
-      alert("password is required");
+      toast({
+        title: "Password is required",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -40,9 +48,12 @@ const Login = () => {
 
       login();
       navigate("/");
-      console.log(response);
     } catch (e) {
       console.error("Error signing in:", e);
+      toast({
+        title: "Incorrect Username or Password",
+        variant: "destructive",
+      });
     }
   };
 
