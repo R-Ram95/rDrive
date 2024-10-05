@@ -36,7 +36,15 @@ const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
         <TableBody>
           {directoryData?.map((item) => (
             <TableRow key={item.key} onClick={() => handleItemClick(item)}>
-              <TableCell className="font-medium">{item.name}</TableCell>
+              <TableCell className="flex font-medium items-center">
+                {" "}
+                {item.type === ItemType.FILE ? (
+                  <i className="bx bx-file text-lg"></i>
+                ) : (
+                  <i className="bx bx-folder text-lg"></i>
+                )}
+                <span className="ml-2">{item.name}</span>
+              </TableCell>
               <TableCell>{item.uploadDate}</TableCell>
               <TableCell>{item.size > 0 ? `${item.size} KB` : "-"}</TableCell>
             </TableRow>
