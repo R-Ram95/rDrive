@@ -36,27 +36,36 @@ export async function handler(event: APIGatewayEvent) {
             (content) => content.Size && content.Size > 0
           ).map((content) => {
             return {
-              fileKey: content.Key,
-              fileName: content.Key?.split("/").slice(-1).pop(),
-              uploadDate: content.LastModified,
-              fileSize: content.Size,
+              key: content.Key,
+              name: content.Key?.split("/").slice(-1).pop(),
+              uploadDate:
+                content.LastModified?.toString() ?? new Date().toISOString(),
+              size: content.Size ?? 0,
+              type: "file",
             };
           })
         : [];
+
     const subFolders =
       response.CommonPrefixes && response.CommonPrefixes.length > 0
         ? response.CommonPrefixes.map((prefix) => {
-            return (
-              prefix.Prefix &&
-              prefix.Prefix.replace(parentFolder!, "/").slice(1, -1)
-            );
+            return {
+              key: prefix.Prefix,
+              name:
+                prefix.Prefix &&
+                prefix.Prefix.replace(parentFolder!, "/").slice(1, -1),
+              uploadDate: "-",
+              size: 0,
+              type: "folder",
+            };
           })
         : [];
 
-    return createResponse(200, "Successfully retrieved files", {
-      files: files,
-      subFolders: subFolders,
-    });
+    return createResponse(
+      200,
+      "Successfully retrieved files",
+      subFolders.concat(files)
+    );
   } catch (e) {
     console.error(e);
     return createResponse(500, "Interal server error");
