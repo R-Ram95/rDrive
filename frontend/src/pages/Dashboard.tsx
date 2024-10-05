@@ -23,11 +23,11 @@ const Dashboard = () => {
           </button>
         </div>
       </header>
-      <div className="flex flex-col p-5 h-[calc(100vh-4rem)]">
+      <div className="flex flex-col px-10 pb-8 h-[calc(100vh-4rem)]">
         <Breadcrumb className="mt-5">
           <BreadcrumbList className="text-lg text-white">
             {pathFragments.map((fragment) => (
-              <>
+              <div className="flex items-center" key={fragment}>
                 <BreadcrumbItem
                   className="hover:cursor-pointer hover:bg-slate-50/10 rounded-full py-1 px-2 "
                   onClick={() => updateCurrentPath(fragment)}
@@ -35,7 +35,7 @@ const Dashboard = () => {
                   {fragment === ROOT_PATH ? "Home" : fragment}
                 </BreadcrumbItem>
                 {pathFragments.length > 1 && <BreadcrumbSeparator />}
-              </>
+              </div>
             ))}
           </BreadcrumbList>
         </Breadcrumb>

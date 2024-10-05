@@ -1,11 +1,9 @@
-export interface FileType {
-  fileKey: string;
-  fileName: string;
-  uploadDate: string;
-  fileSize: number;
-}
+import { ItemType } from "./enums";
 
-export interface DirectoryType {
-  files: FileType[];
-  subFolders: string[];
+export interface DirectoryItemType {
+  key: string;
+  name: string;
+  uploadDate: string;
+  size: number;
+  type: ItemType;
 }

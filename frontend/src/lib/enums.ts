@@ -4,3 +4,8 @@ export enum HTTP_METHOD {
   PUT = "PUT",
   DELETE = "DELETE",
 }
+
+export enum ItemType {
+  FILE = "file",
+  FOLDER = "folder",
+}
