@@ -1,4 +1,4 @@
-import { useListDirectory } from "@/hooks/useDirectory";
+import { useListDirectory, useUploadFile } from "@/hooks/useDirectory";
 import {
   Table,
   TableBody,
@@ -15,7 +15,6 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "./ContextMenu";
-import { uploadFile } from "@/lib/fileUpload";
 import { useRef } from "react";
 
 interface FileViewerProps {
@@ -24,9 +23,9 @@ interface FileViewerProps {
 }
 const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
   const { data: directoryData } = useListDirectory(currentPath);
+  const { mutate: uploadFile } = useUploadFile();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  console.log(currentPath.slice(0, -1));
   const handleItemClick = (item: DirectoryItemType) => {
     if (item.type === ItemType.FOLDER) {
       addPath(item.name);
@@ -42,10 +41,10 @@ const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      await uploadFile({
+      uploadFile({
         fileName: file.name,
         file: file,
-        uploadPath: currentPath.slice(0, -1), // kind of hacky but can fix later
+        uploadPath: currentPath === "/" ? "/" : currentPath.slice(0, -1), // kind of hacky but can fix later
         user: "me",
       });
     }
