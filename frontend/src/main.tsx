@@ -6,9 +6,10 @@ import { Amplify } from "aws-amplify";
 import { CookieStorage } from "aws-amplify/utils";
 import { BrowserRouter } from "react-router-dom";
 import { cognitoUserPoolsTokenProvider } from "aws-amplify/auth/cognito";
-import { AuthProvider } from "./context/AuthContextProvider.tsx";
+import { AuthProvider } from "@/context/AuthContextProvider.tsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { Toaster } from "@/components/Toaster.tsx";
 
 Amplify.configure({
   Auth: {
@@ -37,6 +38,7 @@ createRoot(document.getElementById("root")!).render(
       <BrowserRouter>
         <QueryClientProvider client={queryClient}>
           <App />
+          <Toaster />
           <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
       </BrowserRouter>

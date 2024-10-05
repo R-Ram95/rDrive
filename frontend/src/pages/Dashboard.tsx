@@ -14,7 +14,7 @@ const Dashboard = () => {
   const { currentPath, pathFragments, addPath, updateCurrentPath } = usePath();
 
   return (
-    <div className="h-full overflow-clip bg-custom-blue">
+    <div className="h-full overflow-clip">
       <header className="flex justify-between  px-10 py-4 bg-cover bg-[url('/image.jpeg')]">
         <h1 className="text-2xl font-semibold text-white">r/Drive</h1>
         <div className=" border px-3 py-1 rounded-xl font-medium backdrop-blur-xl shadow-2xl border-white/50">
