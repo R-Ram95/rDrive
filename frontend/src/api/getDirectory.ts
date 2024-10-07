@@ -3,9 +3,9 @@ import { HTTP_METHOD, ItemType } from "@/lib/enums";
 import { DirectoryItemType } from "@/lib/types";
 import dayjs from "dayjs";
 
-export const getDirectory = async (
+export async function getDirectory(
   parentFolder: string
-): Promise<DirectoryItemType[]> => {
+): Promise<DirectoryItemType[]> {
   const route = `/directory?parentFolder=${parentFolder}`;
   const response = await callApi(route, HTTP_METHOD.GET);
 
@@ -19,4 +19,4 @@ export const getDirectory = async (
       size: Math.floor(item.size / 1000),
     };
   });
-};
+}
