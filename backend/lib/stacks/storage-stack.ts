@@ -4,6 +4,7 @@ import {
   Bucket,
   BucketAccessControl,
   BucketEncryption,
+  HttpMethods,
   StorageClass,
 } from "aws-cdk-lib/aws-s3";
 import { Construct } from "constructs";
@@ -36,6 +37,14 @@ export class StorageStack extends Stack {
               transitionAfter: Duration.days(30),
             },
           ],
+        },
+      ],
+      cors: [
+        {
+          allowedOrigins: ["http://localhost:3000"],
+          allowedMethods: [HttpMethods.PUT],
+          allowedHeaders: ["*"],
+          exposedHeaders: ["ETag"],
         },
       ],
     });
