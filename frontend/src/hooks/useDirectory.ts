@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   CreateFolderParams,
   DirectoryItemType,
+  FileState,
+  UploadFileBatchParams,
   UploadFileParams,
 } from "@/lib/types";
 import { useToast } from "./useToast";
@@ -10,6 +12,8 @@ import { uploadFile } from "@/api/uploadFile";
 import { createFolder } from "@/api/createFolder";
 import { ItemType } from "@/lib/enums";
 import dayjs from "dayjs";
+import { useState } from "react";
+import { uploadFileBatch } from "@/api/uploadFileBatch";
 
 export const useListDirectory = (parentFolder: string) => {
   const queryKey = ["directory", parentFolder];
@@ -84,4 +88,60 @@ export const useCreateFolder = () => {
   });
 
   return { mutate };
+};
+
+export const useUploadFileBatch = () => {
+  const [uploadItems, setUploadItems] = useState<FileState[]>([]);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const updateProgress = (
+    fileIndex: number,
+    progress: { isLoading: boolean; isSuccess: boolean; isError: boolean }
+  ) => {
+    setUploadItems((prevItems) =>
+      prevItems.map((item, index) =>
+        index === fileIndex ? { ...item, ...progress } : item
+      )
+    );
+  };
+
+  const { mutate, error } = useMutation({
+    mutationFn: (data: UploadFileBatchParams) => {
+      return uploadFileBatch({
+        ...data,
+        onProgressUpdate: updateProgress,
+      });
+    },
+    onMutate: (data: UploadFileBatchParams) => {
+      const newFiles: FileState[] = data.files.map((file) => {
+        return {
+          ...file,
+          name: file.name,
+          isLoading: true,
+          isSuccess: false,
+          isError: false,
+        };
+      });
+
+      setUploadItems(newFiles);
+    },
+    onSuccess: (_, variables) => {
+      const queryKey = ["directory", `${variables.uploadPath}/`];
+      console.log("QUERY KEY", queryKey);
+      queryClient.invalidateQueries({ queryKey: queryKey });
+    },
+    onError: (error) => {
+      setUploadItems((prevItems) =>
+        prevItems.map((item) => ({ ...item, isError: true, isLoading: false }))
+      );
+      toast({
+        title: "File conflict",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  return { mutate, error, uploadItems };
 };

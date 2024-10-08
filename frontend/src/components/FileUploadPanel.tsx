@@ -1,9 +1,15 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect } from "react";
 import { ScrollArea } from "@/components/ScrollArea";
 // TODO Replace these
 import { ChevronUp, ChevronDown, X } from "lucide-react";
 import { FileWithPath } from "react-dropzone";
 import { Separator } from "./Separator";
+import Spinner from "./Spinner";
+import { useUploadFileBatch } from "@/hooks/useDirectory";
+import {
+  CheckCircledIcon,
+  ExclamationTriangleIcon,
+} from "@radix-ui/react-icons";
 
 interface FileUploadPanelProps {
   files: FileWithPath[];
@@ -20,11 +26,18 @@ const FileUploadPanel = ({
   minimizeUploadPanel,
   setMinimizeUploadPanel,
 }: FileUploadPanelProps) => {
-  const [uploadItems, setUploadItems] = useState<FileWithPath[]>();
+  const { mutate: uploadFiles, uploadItems } = useUploadFileBatch();
 
   useEffect(() => {
-    setUploadItems(files);
-  }, [files, uploadItems]);
+    if (files.length > 1) {
+      uploadFiles({
+        files: files,
+        uploadPath: currentPath === "/" ? "/" : currentPath.slice(0, -1), // bit hacky, fix later
+        user: "me",
+        overwrite: false,
+      });
+    }
+  }, [currentPath, files, uploadFiles]);
 
   const togglePanel = () => setMinimizeUploadPanel(!minimizeUploadPanel);
 
@@ -54,13 +67,20 @@ const FileUploadPanel = ({
                 key={item.name}
                 className="border-t p-2 last:border-b bg-background/70 backdrop-blur-xl"
               >
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center pr-2">
                   <div className="flex items-center">
                     <i className="bx bx-file text-lg" />
                     <span className="text-sm font-medium ml-2">
                       {item.name}
                     </span>
                   </div>
+                  {item.isLoading && <Spinner className="w-5 h-5" />}
+                  {item.isSuccess && (
+                    <CheckCircledIcon className="w-5 h-5 text-green-500" />
+                  )}
+                  {item.isError && (
+                    <ExclamationTriangleIcon className="w-5 h-5 text-red-500" />
+                  )}
                 </div>
               </div>
             ))}

@@ -1,3 +1,4 @@
+import { FileWithPath } from "react-dropzone";
 import { FILE_STATUS, ItemType } from "./enums";
 
 export interface DirectoryItemType {
@@ -7,7 +8,6 @@ export interface DirectoryItemType {
   size: number;
   type: ItemType;
 }
-
 export interface UploadFileParams {
   fileName: string;
   file: File;
@@ -16,14 +16,24 @@ export interface UploadFileParams {
   overwrite?: boolean;
 }
 
+export interface FileState extends FileWithPath {
+  isLoading: boolean;
+  isSuccess: boolean;
+  isError: boolean;
+}
+
 export interface UploadFileBatchParams {
-  files: {
-    fileName: string;
-    file: File;
-  }[];
+  files: FileWithPath[];
   uploadPath: string;
   user: string;
   overwrite?: boolean;
+}
+
+export interface UploadFileAPIArgs extends UploadFileBatchParams {
+  onProgressUpdate: (
+    index: number,
+    progress: { isLoading: boolean; isSuccess: boolean; isError: boolean }
+  ) => void;
 }
 
 export interface CreateFolderParams {
