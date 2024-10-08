@@ -1,6 +1,6 @@
 import { callApi } from "@/lib/callApi";
 import { HTTP_METHOD } from "@/lib/enums";
-import { UploadFileParams } from "@/lib/types";
+import { PresignedUrlData, UploadFileParams } from "@/lib/types";
 
 export async function uploadFile({
   fileName,
@@ -18,7 +18,11 @@ export async function uploadFile({
     user: user,
   };
 
-  const urlResponse = await callApi("/files", HTTP_METHOD.POST, body);
+  const urlResponse = await callApi<PresignedUrlData>(
+    "/files",
+    HTTP_METHOD.POST,
+    body
+  );
 
   if (!urlResponse || !urlResponse.data || !urlResponse.data.url) {
     throw new Error("Failed to retrieve presigned URL");

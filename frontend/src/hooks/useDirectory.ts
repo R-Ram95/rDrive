@@ -8,6 +8,8 @@ import { useToast } from "./useToast";
 import { getDirectory } from "@/api/getDirectory";
 import { uploadFile } from "@/api/uploadFile";
 import { createFolder } from "@/api/createFolder";
+import { ItemType } from "@/lib/enums";
+import dayjs from "dayjs";
 
 export const useListDirectory = (parentFolder: string) => {
   const queryKey = ["directory", parentFolder];
@@ -16,6 +18,18 @@ export const useListDirectory = (parentFolder: string) => {
     {
       queryKey: queryKey,
       queryFn: () => getDirectory(parentFolder),
+      select(data) {
+        return data.map((item) => {
+          return {
+            ...item,
+            uploadDate:
+              item.type === ItemType.FILE
+                ? dayjs(item.uploadDate).format("MM-DD-YYYY")
+                : "-",
+            size: Math.floor(item.size / 1000),
+          };
+        });
+      },
     }
   );
 

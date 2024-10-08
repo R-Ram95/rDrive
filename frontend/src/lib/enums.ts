@@ -9,3 +9,8 @@ export enum ItemType {
   FILE = "file",
   FOLDER = "folder",
 }
+
+export enum FILE_STATUS {
+  CONFLICT = "CONFLICT",
+  CREATED = "CREATED",
+}

@@ -8,7 +8,7 @@ export async function createFolder({
 }: CreateFolderParams) {
   const folder = `${folderPath}${folderName}`;
 
-  const response = await callApi("/directory", HTTP_METHOD.POST, {
+  const response = await callApi<undefined>("/directory", HTTP_METHOD.POST, {
     directory: folder,
   });
 

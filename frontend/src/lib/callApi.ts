@@ -1,11 +1,12 @@
 import { HTTP_METHOD } from "./enums";
 import { cognitoUserPoolsTokenProvider } from "aws-amplify/auth/cognito";
+import { ApiResponse } from "./types";
 
-export const callApi = async (
+export const callApi = async <T>(
   apiRoute: string,
   method: HTTP_METHOD,
   body?: unknown
-) => {
+): Promise<ApiResponse<T>> => {
   try {
     const tokenResponse = await cognitoUserPoolsTokenProvider.getTokens();
     const { accessToken } = tokenResponse ?? {};
@@ -21,8 +22,9 @@ export const callApi = async (
         body: JSON.stringify(body),
       }
     );
-    return response.json();
+    return response.json() as unknown as ApiResponse<T>;
   } catch (error) {
     console.error(`FETCH ERROR: ${error}`);
+    throw new Error("Error fetching API");
   }
 };
