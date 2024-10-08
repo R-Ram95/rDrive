@@ -1,7 +1,5 @@
 import { Dispatch, SetStateAction, useEffect } from "react";
 import { ScrollArea } from "@/components/ScrollArea";
-// TODO Replace these
-import { ChevronUp, ChevronDown, X } from "lucide-react";
 import { FileWithPath } from "react-dropzone";
 import { Separator } from "./Separator";
 import Spinner from "./Spinner";
@@ -9,6 +7,9 @@ import { useUploadFileBatch } from "@/hooks/useDirectory";
 import {
   CheckCircledIcon,
   ExclamationTriangleIcon,
+  CaretUpIcon,
+  CaretDownIcon,
+  Cross1Icon,
 } from "@radix-ui/react-icons";
 
 interface FileUploadPanelProps {
@@ -48,14 +49,17 @@ const FileUploadPanel = ({
         onClick={togglePanel}
       >
         <span>Uploads</span>
-        <div className="flex flex-row gap-2">
+        <div className="flex flex-row gap-2 items-center">
           {!minimizeUploadPanel ? (
-            <ChevronDown className="h-4 w-4" />
+            <CaretDownIcon className="h-6 w-6" />
           ) : (
-            <ChevronUp className="h-4 w-4" />
+            <CaretUpIcon className="h-6 w-6" />
           )}
 
-          <X className="h-4 w-4" onClick={() => setShowUploadPanel(false)} />
+          <Cross1Icon
+            className="h-4 w-4"
+            onClick={() => setShowUploadPanel(false)}
+          />
         </div>
       </button>
       {!minimizeUploadPanel && (
