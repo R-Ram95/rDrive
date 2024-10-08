@@ -77,7 +77,7 @@ const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
         onDragEnd: () => {
           setIsDragging(false);
         },
-        className: `text-white relative mt-2 p-4 border rounded-2xl h-full w-full ${
+        className: `text-white relative mt-2 p-4 border rounded-2xl h-full w-full overflow-y-scroll ${
           isDragging ? "border-primary" : "border-white/20"
         }  ${isDragging ? "bg-white/50" : "bg-white/5"}`,
       })}
