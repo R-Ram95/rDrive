@@ -5,9 +5,11 @@ import { APIStack } from "../lib/stacks/api-stack";
 import { AuthStack } from "../lib/stacks/auth-stack";
 import { DnsStack } from "../lib/stacks/dns-stack";
 import { StorageStack } from "../lib/stacks/storage-stack";
+import * as dotenv from "dotenv";
+dotenv.config();
 
-const APP_NAME = "rDrive";
-const ROOT_DOMAIN = "rohineshram.com";
+const APP_NAME = process.env.APP_NAME!;
+const ROOT_DOMAIN = process.env.ROOT_DOMAIN!;
 
 const app = new cdk.App();
 

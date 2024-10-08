@@ -19,6 +19,9 @@ export class AuthStack extends Stack {
   constructor(scope: Construct, id: string, props: AuthStackProps) {
     super(scope, id, props);
 
+    const formattedAppName =
+      props.appName.slice(0, 1) + "/" + props.appName.slice(1);
+
     this.userPool = new UserPool(this, `${props.appName}-UserPool`, {
       userPoolName: `${props?.appName}-UserPool`,
       accountRecovery: AccountRecovery.EMAIL_ONLY,
@@ -34,10 +37,8 @@ export class AuthStack extends Stack {
         email: true,
       },
       userInvitation: {
-        emailSubject:
-          "Welcome the r:Drive - cloud storage for your videos and images",
-        emailBody:
-          "Hello {username},\n\nThis is your invitation to join r:Drive! Your temporary password is {####}. Please use it to sign in and change your password - it expires in 7 days.\n\n Thank you,\nr:Drive developer <3",
+        emailSubject: `Welcome to ${formattedAppName} - cloud storage for your videos and images`,
+        emailBody: `Hello {username},\n\nThis is your invitation to join ${formattedAppName}! Your temporary password is {####}. Please use it to sign in and change your password - it expires in 7 days.\n\n Thank you,\nr:Drive developer <3`,
       },
       removalPolicy: RemovalPolicy.DESTROY, // DEV ONLY REMOVE IN PROD
     });
