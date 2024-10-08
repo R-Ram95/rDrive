@@ -18,6 +18,8 @@ import {
 import { ChangeEvent, useRef, useState } from "react";
 import { Dialog } from "./Dialog";
 import FolderCreationDialog from "./FolderCreationDialog";
+import { FileWithPath, useDropzone } from "react-dropzone";
+import FileUploadPanel from "./FileUploadPanel";
 
 interface FileViewerProps {
   currentPath: string;
@@ -28,6 +30,14 @@ const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
   const { mutate: uploadFile } = useUploadFile();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [openFolderDialog, setOpenFolderDialog] = useState(false);
+  const [showUploadPanel, setShowUploadPanel] = useState(true);
+  const [minUploadPanel, setMinUploadPanel] = useState(true);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
+    noClick: true,
+    noKeyboard: true,
+  });
 
   const handleItemClick = (item: DirectoryItemType) => {
     if (item.type === ItemType.FOLDER) {
@@ -54,7 +64,24 @@ const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
   };
 
   return (
-    <div className="text-white mt-2 p-4 border rounded-2xl h-full w-full border-white/20 bg-white/5">
+    <div
+      {...getRootProps({
+        onDrop: () => {
+          setShowUploadPanel(true);
+          setMinUploadPanel(false);
+          setIsDragging(false);
+        },
+        onDragEnter: () => {
+          setIsDragging(true);
+        },
+        onDragEnd: () => {
+          setIsDragging(false);
+        },
+        className: `text-white relative mt-2 p-4 border rounded-2xl h-full w-full ${
+          isDragging ? "border-primary" : "border-white/20"
+        }  ${isDragging ? "bg-white/50" : "bg-white/5"}`,
+      })}
+    >
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
@@ -65,18 +92,24 @@ const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
         </TableHeader>
         <TableBody>
           {directoryData?.map((item) => (
-            <TableRow key={item.key} onClick={() => handleItemClick(item)}>
-              <TableCell className="flex font-medium items-center">
-                {item.type === ItemType.FILE ? (
-                  <i className="bx bx-file text-lg" />
-                ) : (
-                  <i className="bx bx-folder text-lg" />
-                )}
-                <span className="ml-2">{item.name}</span>
-              </TableCell>
-              <TableCell>{item.uploadDate}</TableCell>
-              <TableCell>{item.size > 0 ? `${item.size} KB` : "-"}</TableCell>
-            </TableRow>
+            <ContextMenu key={item.key}>
+              <ContextMenuTrigger asChild>
+                <TableRow onClick={() => handleItemClick(item)}>
+                  <TableCell className="flex font-medium items-center">
+                    {item.type === ItemType.FILE ? (
+                      <i className="bx bx-file text-lg" />
+                    ) : (
+                      <i className="bx bx-folder text-lg" />
+                    )}
+                    <span className="ml-2">{item.name}</span>
+                  </TableCell>
+                  <TableCell>{item.uploadDate}</TableCell>
+                  <TableCell>
+                    {item.size > 0 ? `${item.size} KB` : "-"}
+                  </TableCell>
+                </TableRow>
+              </ContextMenuTrigger>
+            </ContextMenu>
           ))}
         </TableBody>
       </Table>
@@ -94,11 +127,11 @@ const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
             </ContextMenuItem>
           </ContextMenuContent>
           <ContextMenuTrigger className="flex h-full"></ContextMenuTrigger>
+          <FolderCreationDialog
+            currentPath={currentPath}
+            setOpenFolderDialog={setOpenFolderDialog}
+          />
         </ContextMenu>
-        <FolderCreationDialog
-          currentPath={currentPath}
-          setOpenFolderDialog={setOpenFolderDialog}
-        />
       </Dialog>
 
       <input
@@ -107,6 +140,18 @@ const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
         className="hidden"
         onChange={(e) => handleFileUpload(e)}
       />
+
+      <input {...getInputProps()} />
+
+      {showUploadPanel && (
+        <FileUploadPanel
+          currentPath={currentPath}
+          files={acceptedFiles as FileWithPath[]}
+          setShowUploadPanel={setShowUploadPanel}
+          minimizeUploadPanel={minUploadPanel}
+          setMinimizeUploadPanel={setMinUploadPanel}
+        />
+      )}
     </div>
   );
 };
