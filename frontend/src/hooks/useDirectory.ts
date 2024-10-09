@@ -189,7 +189,7 @@ export const useDeleteFile = () => {
       toast({
         title: `${inputData.fileName} has been deleted!`,
       });
-      const queryKey = ["directory", `${inputData.folderPath}`];
+      const queryKey = ["directory", inputData.folderPath];
       queryClient.invalidateQueries({ queryKey: queryKey });
     },
     onError: (error, inputData) => {
@@ -206,9 +206,13 @@ export const useDeleteFile = () => {
 
 export const useDeleteFolder = () => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { mutate } = useMutation({
     mutationFn: (data: FolderParams) => deleteFolder(data),
     onSuccess: (_, inputData) => {
+      const queryKey = ["directory", inputData.folderPath];
+      queryClient.invalidateQueries({ queryKey: queryKey });
+
       toast({
         title: `${inputData.folderName} has been deleted!`,
       });

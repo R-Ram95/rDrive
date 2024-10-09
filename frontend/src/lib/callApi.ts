@@ -25,12 +25,13 @@ export const callApi = async <T>(
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || "An error occurred");
+      throw new Error(errorData.message || "An unknown error occurred");
     }
 
     return response.json() as unknown as ApiResponse<T>;
-  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     console.error(`FETCH ERROR: ${error}`);
-    throw new Error("Error fetching API");
+    throw new Error(error.message || "Error fetching api");
   }
 };

@@ -9,7 +9,6 @@ import {
   PutObjectCommand,
   PutObjectRequest,
   S3Client,
-  waitUntilObjectNotExists,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import {
@@ -211,14 +210,29 @@ export async function listDirectory(parentFolder: string) {
   return subFolders.concat(files);
 }
 
-export async function deleteObject(key: string) {
+async function dirIsEmpty(directory: string) {
+  const commandInput: ListObjectsV2Request = {
+    Bucket: bucketName,
+    Delimiter: "/",
+    Prefix: directory,
+  };
+
+  const response = await s3Client.send(new ListObjectsV2Command(commandInput));
+
+  if (!response.Contents) return true;
+
+  return response.Contents.length < 1;
+}
+
+export async function deleteObject(key: string, folderName?: string) {
   const objectExists = checkIfObjectExists({ key, bucketName });
 
   if (!objectExists) {
     throw new ConflictError(409, `Request failed: ${key} does not exist`);
   }
 
-  if (key.endsWith("/")) {
+  // object is a folder, it must be empty to delete
+  if (folderName && !(await dirIsEmpty(folderName))) {
     throw new ConflictError(
       400,
       `Request failed: cannot delete folder '${key}' as it contains children`
@@ -231,11 +245,6 @@ export async function deleteObject(key: string) {
   };
 
   await s3Client.send(new DeleteObjectCommand(commandInput));
-
-  await waitUntilObjectNotExists(
-    { client: s3Client, maxWaitTime: 5 },
-    { Bucket: bucketName, Key: key }
-  );
 
   return { message: `Request successful: ${key} was deleted` };
 }

@@ -5,7 +5,7 @@ import { FileParams } from "@/lib/types";
 export async function deleteFile({ fileName, folderPath }: FileParams) {
   const body = {
     fileName: fileName,
-    folderPath: folderPath,
+    folderPath: `${folderPath}/`,
   };
 
   const response = await callApi("/files", HTTP_METHOD.DELETE, body);

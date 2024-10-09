@@ -6,6 +6,11 @@ export interface File {
   overwrite?: boolean;
 }
 
+export interface Folder {
+  folderName: string;
+  parentFolderPath: string;
+}
+
 export interface GenerateFileUploadUrlArgs {
   file: File;
   bucketName: string | undefined;

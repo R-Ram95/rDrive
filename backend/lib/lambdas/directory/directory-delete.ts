@@ -1,17 +1,23 @@
 import { ConflictError, createResponse } from "../../utils/lambda-helper";
 import { deleteObject } from "../../utils/s3-helper";
-import { File } from "../../utils/types";
+import { Folder } from "../../utils/types";
 import { APIGatewayEvent } from "aws-lambda";
 
 export async function handler(event: APIGatewayEvent) {
-  const requestBody: File = event.body ? JSON.parse(event.body) : {};
-  const { folderPath } = requestBody;
+  const requestBody: Folder = event.body ? JSON.parse(event.body) : {};
+  const { parentFolderPath, folderName } = requestBody;
 
-  if (!folderPath)
-    createResponse(400, "Invalid request: folderPath must be provied.");
+  if (!parentFolderPath || !folderName)
+    createResponse(
+      400,
+      "Invalid request: parentFolderPath and folderName must be provied."
+    );
 
   try {
-    const result = await deleteObject(folderPath);
+    const result = await deleteObject(
+      `${parentFolderPath}${folderName}`,
+      folderName
+    );
     return createResponse(200, result.message);
   } catch (e) {
     if (e instanceof ConflictError) {
