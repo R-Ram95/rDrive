@@ -11,7 +11,7 @@ export async function uploadFile({
   const body = {
     file: {
       fileName: file.name,
-      folderPath: uploadPath,
+      folderPath: `${uploadPath}/`,
       overwrite: overwrite,
     },
     user: user,

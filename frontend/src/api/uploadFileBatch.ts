@@ -11,7 +11,7 @@ export async function uploadFileBatch({
 }: UploadFileAPIArgs) {
   const filesRequest = files.map((file) => {
     return {
-      folderPath: uploadPath,
+      folderPath: `${uploadPath}/`,
       fileName: file.name,
       overwrite: overwrite,
     };

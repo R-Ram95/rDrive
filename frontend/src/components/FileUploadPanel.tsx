@@ -34,7 +34,7 @@ const FileUploadPanel = ({
     if (files.length > 1) {
       uploadFiles({
         files: files,
-        uploadPath: currentPath === "/" ? "/" : currentPath.slice(0, -1), // bit hacky, fix later
+        uploadPath: currentPath,
         user: "me",
         overwrite: false,
       });
@@ -43,7 +43,7 @@ const FileUploadPanel = ({
     if (files.length === 1) {
       uploadFile({
         file: files[0],
-        uploadPath: currentPath === "/" ? "/" : currentPath.slice(0, -1), // bit hacky, fix later
+        uploadPath: currentPath,
         user: "me",
       });
     }
