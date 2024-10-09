@@ -1,10 +1,15 @@
 import {
+  DeleteObjectCommand,
+  DeleteObjectCommandInput,
   GetObjectCommand,
   GetObjectRequest,
   HeadObjectCommand,
+  ListObjectsV2Command,
+  ListObjectsV2Request,
   PutObjectCommand,
   PutObjectRequest,
   S3Client,
+  waitUntilObjectNotExists,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import {
@@ -12,8 +17,10 @@ import {
   GenerateFileDownloadUrlArgs,
   GenerateFileUploadUrlArgs,
 } from "./types";
+import { ConflictError } from "./lambda-helper";
 
 const s3Client = new S3Client({ region: process.env.REGION });
+const bucketName = process.env.BUCKET_NAME;
 
 export async function checkIfObjectExists({
   key,
@@ -134,4 +141,101 @@ export async function generateFileDownloaddUrl({
     console.error(e);
     throw new Error("Request Failed: failed due to internal server error");
   }
+}
+
+export async function createDirectory(directory: string) {
+  const objectExists = await checkIfObjectExists({
+    bucketName,
+    key: directory,
+  });
+
+  if (objectExists) {
+    throw new ConflictError(
+      409,
+      `Request failed: the ${directory} folder already exists`
+    );
+  }
+
+  const commandInput: PutObjectRequest = {
+    Bucket: bucketName,
+    Key: directory,
+  };
+
+  await s3Client.send(new PutObjectCommand(commandInput));
+
+  return {
+    message: `Request successful: the ${directory} folder has been created`,
+  };
+}
+
+export async function listDirectory(parentFolder: string) {
+  const commandInput: ListObjectsV2Request = {
+    Bucket: bucketName,
+    Delimiter: "/",
+    Prefix: parentFolder,
+  };
+
+  const response = await s3Client.send(new ListObjectsV2Command(commandInput));
+
+  const files =
+    response.Contents && response.Contents.length > 0
+      ? response.Contents.filter(
+          (content) => content.Size && content.Size > 0
+        ).map((content) => {
+          return {
+            key: content.Key,
+            name: content.Key?.split("/").slice(-1).pop(),
+            uploadDate:
+              content.LastModified?.toString() ?? new Date().toISOString(),
+            size: content.Size ?? 0,
+            type: "file",
+          };
+        })
+      : [];
+
+  const subFolders =
+    response.CommonPrefixes && response.CommonPrefixes.length > 0
+      ? response.CommonPrefixes.map((prefix) => {
+          return {
+            key: prefix.Prefix,
+            name:
+              prefix.Prefix &&
+              prefix.Prefix.replace(parentFolder!, "/").slice(1, -1),
+            uploadDate: "-",
+            size: 0,
+            type: "folder",
+          };
+        })
+      : [];
+
+  return subFolders.concat(files);
+}
+
+export async function deleteObject(key: string) {
+  const objectExists = checkIfObjectExists({ key, bucketName });
+
+  if (!objectExists) {
+    throw new ConflictError(409, `Request failed: ${key} does not exist`);
+  }
+
+  if (key.endsWith("/")) {
+    throw new ConflictError(
+      400,
+      `Request failed: cannot delete folder '${key}' as it contains children`
+    );
+  }
+
+  const commandInput: DeleteObjectCommandInput = {
+    Bucket: bucketName,
+    Key: key,
+  };
+
+  await s3Client.send(new DeleteObjectCommand(commandInput));
+
+  await waitUntilObjectNotExists(
+    { client: s3Client, maxWaitTime: 5 },
+    { Bucket: bucketName, Key: key }
+  );
+
+  return { message: `Request successful: ${key} was deleted` };
 }

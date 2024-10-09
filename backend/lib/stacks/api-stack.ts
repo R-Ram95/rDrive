@@ -1,4 +1,4 @@
-import { StackProps, Stack } from "aws-cdk-lib";
+import { StackProps, Stack, Duration } from "aws-cdk-lib";
 import {
   HttpMethod,
   DomainName,
@@ -45,6 +45,13 @@ const apiConfig = [
     permission: PERMISION.READ,
   },
   {
+    functionName: "FileDelete",
+    endpoint: `/files`,
+    entryFile: path.join(lambdasDir, "files", "file-delete.ts"),
+    methods: [HttpMethod.DELETE],
+    permission: PERMISION.READ_WRITE,
+  },
+  {
     functionName: "BatchFileUpload",
     endpoint: `/files/batch`,
     entryFile: path.join(lambdasDir, "files", "file-upload-batch.ts"),
@@ -61,16 +68,23 @@ const apiConfig = [
   {
     functionName: "CreateFolder",
     endpoint: `/directory`,
-    entryFile: path.join(lambdasDir, "directory", "create-directory.ts"),
+    entryFile: path.join(lambdasDir, "directory", "directory-create.ts"),
     methods: [HttpMethod.POST],
     permission: PERMISION.READ_WRITE,
   },
   {
     functionName: "ListDirectory",
     endpoint: `/directory`,
-    entryFile: path.join(lambdasDir, "directory", "list-directory.ts"),
+    entryFile: path.join(lambdasDir, "directory", "directory-list.ts"),
     methods: [HttpMethod.GET],
     permission: PERMISION.READ,
+  },
+  {
+    functionName: "DeleteFolder",
+    endpoint: `/directory`,
+    entryFile: path.join(lambdasDir, "directory", "directory-delete.ts"),
+    methods: [HttpMethod.DELETE],
+    permission: PERMISION.READ_WRITE,
   },
 ];
 
@@ -118,6 +132,7 @@ export class APIStack extends Stack {
               BUCKET_NAME: props.assetStorage.bucketName,
               REGION: this.region,
             },
+            memorySize: 128,
           }
         );
         // grant permissions
@@ -129,7 +144,10 @@ export class APIStack extends Stack {
         // create integration
         const integration = new HttpLambdaIntegration(
           `${functionName}Integration`,
-          lambda
+          lambda,
+          {
+            timeout: Duration.seconds(3),
+          }
         );
         // add route
         httpApi.addRoutes({

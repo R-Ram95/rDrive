@@ -63,3 +63,15 @@ export function validateMultipleUploadRequest(
 
   return null;
 }
+
+export class ConflictError extends Error {
+  public code: number;
+
+  constructor(code: number, message: string) {
+    super(message);
+    this.message = message;
+    this.code = code;
+
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
+}
