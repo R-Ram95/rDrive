@@ -51,7 +51,7 @@ export const useUploadFile = () => {
         title: `${inputData.fileName} uploaded successfully!`,
       });
 
-      const queryKey = ["directory", inputData.uploadPath];
+      const queryKey = ["directory", `${inputData.uploadPath}/`];
       queryClient.invalidateQueries({ queryKey: queryKey });
     },
     onError: (error, variables) => {
@@ -126,9 +126,8 @@ export const useUploadFileBatch = () => {
 
       setUploadItems(newFiles);
     },
-    onSuccess: (_, variables) => {
-      const queryKey = ["directory", `${variables.uploadPath}/`];
-      console.log("QUERY KEY", queryKey);
+    onSuccess: (_, inputData) => {
+      const queryKey = ["directory", `${inputData.uploadPath}/`];
       queryClient.invalidateQueries({ queryKey: queryKey });
     },
     onError: (error) => {
