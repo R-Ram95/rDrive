@@ -38,9 +38,7 @@ const FileUploadPanel = ({
         user: "me",
         overwrite: false,
       });
-    }
-
-    if (files.length === 1) {
+    } else if (files.length === 1) {
       uploadFile({
         file: files[0],
         uploadPath: currentPath,

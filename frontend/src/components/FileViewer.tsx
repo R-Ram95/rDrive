@@ -33,7 +33,7 @@ interface FileViewerProps {
 const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
   const { data: directoryData } = useListDirectory(currentPath);
   const [openFolderDialog, setOpenFolderDialog] = useState(false);
-  const [showUploadPanel, setShowUploadPanel] = useState(true);
+  const [showUploadPanel, setShowUploadPanel] = useState(false);
   const [minUploadPanel, setMinUploadPanel] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const { mutate: deleteFile } = useDeleteFile();
