@@ -22,6 +22,12 @@ export const callApi = async <T>(
         body: JSON.stringify(body),
       }
     );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "An error occurred");
+    }
+
     return response.json() as unknown as ApiResponse<T>;
   } catch (error) {
     console.error(`FETCH ERROR: ${error}`);

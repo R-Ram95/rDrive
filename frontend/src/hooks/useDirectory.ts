@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  CreateFolderParams,
   DirectoryItemType,
+  FileParams,
   FileState,
+  FolderParams,
   UploadFileBatchParams,
   UploadFileParams,
 } from "@/lib/types";
@@ -14,6 +15,8 @@ import { ItemType } from "@/lib/enums";
 import dayjs from "dayjs";
 import { useState } from "react";
 import { uploadFileBatch } from "@/api/uploadFileBatch";
+import { deleteFile } from "@/api/deleteFile";
+import { deleteFolder } from "@/api/deleteFolder";
 
 export const useListDirectory = (parentFolder: string) => {
   const queryKey = ["directory", parentFolder];
@@ -101,7 +104,7 @@ export const useCreateFolder = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
-    mutationFn: (data: CreateFolderParams) => createFolder(data),
+    mutationFn: (data: FolderParams) => createFolder(data),
     onSuccess: (_, inputData) => {
       toast({
         title: `${inputData.folderName} has been created!`,
@@ -174,4 +177,50 @@ export const useUploadFileBatch = () => {
   });
 
   return { mutate, error, uploadItems };
+};
+
+export const useDeleteFile = () => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const { mutate } = useMutation({
+    mutationFn: (data: FileParams) => deleteFile(data),
+    onSuccess: (_, inputData) => {
+      toast({
+        title: `${inputData.fileName} has been deleted!`,
+      });
+      const queryKey = ["directory", `${inputData.folderPath}`];
+      queryClient.invalidateQueries({ queryKey: queryKey });
+    },
+    onError: (error, inputData) => {
+      toast({
+        title: `Failed to delete ${inputData.fileName} :(`,
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  return { mutate };
+};
+
+export const useDeleteFolder = () => {
+  const { toast } = useToast();
+  const { mutate } = useMutation({
+    mutationFn: (data: FolderParams) => deleteFolder(data),
+    onSuccess: (_, inputData) => {
+      toast({
+        title: `${inputData.folderName} has been deleted!`,
+      });
+    },
+    onError: (error, inputData) => {
+      toast({
+        title: `Failed to delete ${inputData.folderName} :(`,
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  return { mutate };
 };

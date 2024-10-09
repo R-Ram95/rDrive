@@ -35,8 +35,13 @@ export interface UploadFileAPIArgs extends UploadFileBatchParams {
   ) => void;
 }
 
-export interface CreateFolderParams {
+export interface FolderParams {
   folderName: string;
+  folderPath: string;
+}
+
+export interface FileParams {
+  fileName: string;
   folderPath: string;
 }
 

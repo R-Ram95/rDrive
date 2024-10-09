@@ -1,4 +1,8 @@
-import { useListDirectory } from "@/hooks/useDirectory";
+import {
+  useDeleteFile,
+  useDeleteFolder,
+  useListDirectory,
+} from "@/hooks/useDirectory";
 import {
   Table,
   TableBody,
@@ -20,6 +24,7 @@ import { Dialog } from "./Dialog";
 import FolderCreationDialog from "./FolderCreationDialog";
 import { FileWithPath, useDropzone } from "react-dropzone";
 import FileUploadPanel from "./FileUploadPanel";
+import { FileMinusIcon } from "@radix-ui/react-icons";
 
 interface FileViewerProps {
   currentPath: string;
@@ -31,6 +36,8 @@ const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
   const [showUploadPanel, setShowUploadPanel] = useState(true);
   const [minUploadPanel, setMinUploadPanel] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
+  const { mutate: deleteFile } = useDeleteFile();
+  const { mutate: deleteFolder } = useDeleteFolder();
 
   const { acceptedFiles, getRootProps, getInputProps, open } = useDropzone({
     noClick: true,
@@ -95,6 +102,37 @@ const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
                   </TableCell>
                 </TableRow>
               </ContextMenuTrigger>
+              <ContextMenuContent
+                className="w-48 bg-background/5 backdrop-blur-xl border-white/10 text-white"
+                aria-hidden={false}
+                tabIndex={0}
+              >
+                {item.type === ItemType.FILE ? (
+                  <ContextMenuItem
+                    onClick={() =>
+                      deleteFile({
+                        fileName: item.name,
+                        folderPath: currentPath,
+                      })
+                    }
+                  >
+                    <FileMinusIcon className="text-md" />
+                    <span className="ml-2">Delete File</span>
+                  </ContextMenuItem>
+                ) : (
+                  <ContextMenuItem
+                    onClick={() =>
+                      deleteFolder({
+                        folderName: item.name,
+                        folderPath: currentPath,
+                      })
+                    }
+                  >
+                    <i className="bx bx-folder-minus text-md" />
+                    <span className="ml-2">Delete Folder</span>
+                  </ContextMenuItem>
+                )}
+              </ContextMenuContent>
             </ContextMenu>
           ))}
         </TableBody>
