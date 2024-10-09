@@ -43,27 +43,58 @@ export const useListDirectory = (parentFolder: string) => {
 export const useUploadFile = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [uploadItem, setUploadItem] = useState<FileState>();
 
   const { mutate } = useMutation({
     mutationFn: (data: UploadFileParams) => uploadFile(data),
+    onMutate: (inputData: UploadFileParams) => {
+      const newFileState: FileState = {
+        ...inputData.file,
+        name: inputData.file.name,
+        isLoading: true,
+        isSuccess: false,
+        isError: false,
+      };
+
+      setUploadItem(newFileState);
+    },
     onSuccess: (_, inputData) => {
+      const newFileState: FileState = {
+        ...inputData.file,
+        name: inputData.file.name,
+        isLoading: false,
+        isSuccess: true,
+        isError: false,
+      };
+
+      setUploadItem(newFileState);
+
       toast({
-        title: `${inputData.fileName} uploaded successfully!`,
+        title: `${inputData.file.name} uploaded successfully!`,
       });
 
       const queryKey = ["directory", `${inputData.uploadPath}/`];
       queryClient.invalidateQueries({ queryKey: queryKey });
     },
-    onError: (error, variables) => {
+    onError: (error, inputData) => {
+      const newFileState: FileState = {
+        ...inputData.file,
+        name: inputData.file.name,
+        isLoading: false,
+        isSuccess: false,
+        isError: true,
+      };
+
+      setUploadItem(newFileState);
       toast({
-        title: `Failed to upload ${variables.fileName}`,
+        title: `Failed to upload ${inputData.file.name}`,
         description: error.message,
         variant: "destructive",
       });
     },
   });
 
-  return { mutate };
+  return { mutate, uploadItem };
 };
 
 export const useCreateFolder = () => {

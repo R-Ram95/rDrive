@@ -3,7 +3,6 @@ import { HTTP_METHOD } from "@/lib/enums";
 import { PresignedUrlData, UploadFileParams } from "@/lib/types";
 
 export async function uploadFile({
-  fileName,
   file,
   uploadPath,
   user,
@@ -11,7 +10,7 @@ export async function uploadFile({
 }: UploadFileParams) {
   const body = {
     file: {
-      fileName: fileName,
+      fileName: file.name,
       folderPath: uploadPath,
       overwrite: overwrite,
     },

@@ -9,8 +9,7 @@ export interface DirectoryItemType {
   type: ItemType;
 }
 export interface UploadFileParams {
-  fileName: string;
-  file: File;
+  file: FileWithPath;
   uploadPath: string;
   user: string;
   overwrite?: boolean;

@@ -1,4 +1,4 @@
-import { useListDirectory, useUploadFile } from "@/hooks/useDirectory";
+import { useListDirectory } from "@/hooks/useDirectory";
 import {
   Table,
   TableBody,
@@ -15,7 +15,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "./ContextMenu";
-import { ChangeEvent, useRef, useState } from "react";
+import { useState } from "react";
 import { Dialog } from "./Dialog";
 import FolderCreationDialog from "./FolderCreationDialog";
 import { FileWithPath, useDropzone } from "react-dropzone";
@@ -27,14 +27,12 @@ interface FileViewerProps {
 }
 const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
   const { data: directoryData } = useListDirectory(currentPath);
-  const { mutate: uploadFile } = useUploadFile();
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [openFolderDialog, setOpenFolderDialog] = useState(false);
   const [showUploadPanel, setShowUploadPanel] = useState(true);
   const [minUploadPanel, setMinUploadPanel] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
 
-  const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
+  const { acceptedFiles, getRootProps, getInputProps, open } = useDropzone({
     noClick: true,
     noKeyboard: true,
   });
@@ -46,21 +44,9 @@ const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
   };
 
   const handleUploadClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-
-  const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      uploadFile({
-        fileName: file.name,
-        file: file,
-        uploadPath: currentPath === "/" ? "/" : currentPath.slice(0, -1), // kind of hacky but can fix later
-        user: "me",
-      });
-    }
+    open();
+    setShowUploadPanel(true);
+    setMinUploadPanel(false);
   };
 
   return (
@@ -133,13 +119,6 @@ const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
           />
         </ContextMenu>
       </Dialog>
-
-      <input
-        ref={fileInputRef}
-        type="file"
-        className="hidden"
-        onChange={(e) => handleFileUpload(e)}
-      />
 
       <input {...getInputProps()} />
 

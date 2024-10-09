@@ -3,7 +3,7 @@ import { ScrollArea } from "@/components/ScrollArea";
 import { FileWithPath } from "react-dropzone";
 import { Separator } from "./Separator";
 import Spinner from "./Spinner";
-import { useUploadFileBatch } from "@/hooks/useDirectory";
+import { useUploadFile, useUploadFileBatch } from "@/hooks/useDirectory";
 import {
   CheckCircledIcon,
   ExclamationTriangleIcon,
@@ -28,6 +28,7 @@ const FileUploadPanel = ({
   setMinimizeUploadPanel,
 }: FileUploadPanelProps) => {
   const { mutate: uploadFiles, uploadItems } = useUploadFileBatch();
+  const { mutate: uploadFile, uploadItem } = useUploadFile();
 
   useEffect(() => {
     if (files.length > 1) {
@@ -38,7 +39,15 @@ const FileUploadPanel = ({
         overwrite: false,
       });
     }
-  }, [currentPath, files, uploadFiles]);
+
+    if (files.length === 1) {
+      uploadFile({
+        file: files[0],
+        uploadPath: currentPath === "/" ? "/" : currentPath.slice(0, -1), // bit hacky, fix later
+        user: "me",
+      });
+    }
+  }, [currentPath, files, uploadFile, uploadFiles]);
 
   const togglePanel = () => setMinimizeUploadPanel(!minimizeUploadPanel);
 
@@ -66,23 +75,23 @@ const FileUploadPanel = ({
         <ScrollArea className="h-64 p-0 bg-white/10 backdrop-blur-sm">
           <Separator className=" bg-white/20" />
           <div className=" w-full">
-            {uploadItems?.map((item) => (
+            {[...uploadItems, uploadItem].map((item) => (
               <div
-                key={item.name}
+                key={item?.name}
                 className="border-t p-2 last:border-b bg-background/70 backdrop-blur-xl"
               >
                 <div className="flex justify-between items-center pr-2">
                   <div className="flex items-center">
                     <i className="bx bx-file text-lg" />
                     <span className="text-sm font-medium ml-2">
-                      {item.name}
+                      {item?.name}
                     </span>
                   </div>
-                  {item.isLoading && <Spinner className="w-5 h-5" />}
-                  {item.isSuccess && (
+                  {item?.isLoading && <Spinner className="w-5 h-5" />}
+                  {item?.isSuccess && (
                     <CheckCircledIcon className="w-5 h-5 text-green-500" />
                   )}
-                  {item.isError && (
+                  {item?.isError && (
                     <ExclamationTriangleIcon className="w-5 h-5 text-red-500" />
                   )}
                 </div>
