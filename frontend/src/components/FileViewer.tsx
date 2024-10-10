@@ -26,13 +26,15 @@ import FolderCreationDialog from "./FolderCreationDialog";
 import { FileWithPath, useDropzone } from "react-dropzone";
 import FileUploadPanel from "./FileUploadPanel";
 import { FileMinusIcon, DownloadIcon } from "@radix-ui/react-icons";
+import TableSkeleton from "./Table.skeleton";
 
 interface FileViewerProps {
   currentPath: string;
   addPath: (folder: string) => void;
 }
 const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
-  const { data: directoryData } = useListDirectory(currentPath);
+  const { data: directoryData, isLoading: directoryLoading } =
+    useListDirectory(currentPath);
   const [openFolderDialog, setOpenFolderDialog] = useState(false);
   const [showUploadPanel, setShowUploadPanel] = useState(false);
   const [minUploadPanel, setMinUploadPanel] = useState(true);
@@ -77,82 +79,87 @@ const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
         }  ${isDragging ? "bg-white/50" : "bg-white/5"}`,
       })}
     >
-      <Table>
-        <TableHeader>
-          <TableRow className="hover:bg-transparent">
-            <TableHead>Name</TableHead>
-            <TableHead>Last Modified</TableHead>
-            <TableHead>File Size</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {directoryData?.map((item) => (
-            <ContextMenu key={item.key}>
-              <ContextMenuTrigger asChild>
-                <TableRow onClick={() => handleItemClick(item)}>
-                  <TableCell className="flex font-medium items-center">
-                    {item.type === ItemType.FILE ? (
-                      <i className="bx bx-file text-lg" />
-                    ) : (
-                      <i className="bx bx-folder text-lg" />
-                    )}
-                    <span className="ml-2">{item.name}</span>
-                  </TableCell>
-                  <TableCell>{item.uploadDate}</TableCell>
-                  <TableCell>
-                    {item.size > 0 ? `${item.size} KB` : "-"}
-                  </TableCell>
-                </TableRow>
-              </ContextMenuTrigger>
-              <ContextMenuContent
-                className="w-48 bg-background/5 backdrop-blur-xl border-white/10 text-white"
-                aria-hidden={false}
-                tabIndex={0}
-              >
-                {item.type === ItemType.FILE ? (
-                  <>
+      {directoryLoading && <TableSkeleton />}
+      {!directoryLoading && (
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead>Name</TableHead>
+              <TableHead>Last Modified</TableHead>
+              <TableHead>File Size</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {directoryData?.length === 0 && (
+              <h1 className="text-xl mt-5"> Woah... this folder is empty!</h1>
+            )}
+            {directoryData?.map((item) => (
+              <ContextMenu key={item.key}>
+                <ContextMenuTrigger asChild>
+                  <TableRow onClick={() => handleItemClick(item)}>
+                    <TableCell className="flex font-medium items-center">
+                      {item.type === ItemType.FILE ? (
+                        <i className="bx bx-file text-lg" />
+                      ) : (
+                        <i className="bx bx-folder text-lg" />
+                      )}
+                      <span className="ml-2">{item.name}</span>
+                    </TableCell>
+                    <TableCell>{item.uploadDate}</TableCell>
+                    <TableCell>
+                      {item.size > 0 ? `${item.size} KB` : "-"}
+                    </TableCell>
+                  </TableRow>
+                </ContextMenuTrigger>
+                <ContextMenuContent
+                  className="w-48 bg-background/5 backdrop-blur-xl border-white/10 text-white"
+                  aria-hidden={false}
+                  tabIndex={0}
+                >
+                  {item.type === ItemType.FILE ? (
+                    <>
+                      <ContextMenuItem
+                        onClick={() =>
+                          deleteFile({
+                            fileName: item.name,
+                            folderPath: currentPath,
+                          })
+                        }
+                      >
+                        <FileMinusIcon className="text-md" />
+                        <span className="ml-2">Delete File</span>
+                      </ContextMenuItem>
+                      <ContextMenuItem
+                        onClick={() =>
+                          downloadFile({
+                            fileName: item.name,
+                            folderPath: currentPath,
+                          })
+                        }
+                      >
+                        <DownloadIcon className="text-md" />
+                        <span className="ml-2">Download File</span>
+                      </ContextMenuItem>
+                    </>
+                  ) : (
                     <ContextMenuItem
                       onClick={() =>
-                        deleteFile({
-                          fileName: item.name,
+                        deleteFolder({
+                          folderName: item.name,
                           folderPath: currentPath,
                         })
                       }
                     >
-                      <FileMinusIcon className="text-md" />
-                      <span className="ml-2">Delete File</span>
+                      <i className="bx bx-folder-minus text-md" />
+                      <span className="ml-2">Delete Folder</span>
                     </ContextMenuItem>
-                    <ContextMenuItem
-                      onClick={() =>
-                        downloadFile({
-                          fileName: item.name,
-                          folderPath: currentPath,
-                        })
-                      }
-                    >
-                      <DownloadIcon className="text-md" />
-                      <span className="ml-2">Download File</span>
-                    </ContextMenuItem>
-                  </>
-                ) : (
-                  <ContextMenuItem
-                    onClick={() =>
-                      deleteFolder({
-                        folderName: item.name,
-                        folderPath: currentPath,
-                      })
-                    }
-                  >
-                    <i className="bx bx-folder-minus text-md" />
-                    <span className="ml-2">Delete Folder</span>
-                  </ContextMenuItem>
-                )}
-              </ContextMenuContent>
-            </ContextMenu>
-          ))}
-        </TableBody>
-      </Table>
-
+                  )}
+                </ContextMenuContent>
+              </ContextMenu>
+            ))}
+          </TableBody>
+        </Table>
+      )}
       <Dialog open={openFolderDialog}>
         <ContextMenu>
           <ContextMenuContent className="w-48 bg-white/5 border-white/10 text-white">
