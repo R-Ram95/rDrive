@@ -11,7 +11,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "./Table";
+} from "./library/Table";
 import { DirectoryItemType } from "@/lib/types";
 import { ItemType } from "@/lib/enums";
 import {
@@ -19,9 +19,9 @@ import {
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
-} from "./ContextMenu";
+} from "./library/ContextMenu";
 import { useState } from "react";
-import { Dialog } from "./Dialog";
+import { Dialog } from "./library/Dialog";
 import FolderCreationDialog from "./FolderCreationDialog";
 import { FileWithPath, useDropzone } from "react-dropzone";
 import FileUploadPanel from "./FileUploadPanel";

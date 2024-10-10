@@ -4,7 +4,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "./Dialog";
+} from "./library/Dialog";
 import { useToast } from "@/hooks/useToast";
 import { useCreateFolder } from "@/hooks/useDirectory";
 import { ROOT_PATH } from "@/lib/constants";

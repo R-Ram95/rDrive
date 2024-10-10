@@ -5,8 +5,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "./Table";
-import { Skeleton } from "./Skeleton";
+} from "./library/Table";
+import { Skeleton } from "./library/Skeleton";
 
 const TableSkeleton = () => {
   return (
@@ -25,8 +25,8 @@ const TableSkeleton = () => {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {[...Array(10)].map(() => (
-          <TableRow>
+        {[...Array(10).keys()].map((index) => (
+          <TableRow key={`key-${index}`}>
             <TableCell>
               <Skeleton className="h-8 w-2/3" />
             </TableCell>

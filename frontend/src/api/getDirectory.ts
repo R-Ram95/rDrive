@@ -7,7 +7,6 @@ export async function getDirectory(
   parentFolder: string
 ): Promise<DirectoryItemType[]> {
   const path = transformFolderPath(parentFolder);
-  console.log(path);
   const route = `/directory?parentFolder=${path}`;
 
   const response = await callApi<DirectoryItemType[]>(route, HTTP_METHOD.GET);

@@ -9,7 +9,7 @@ import { cognitoUserPoolsTokenProvider } from "aws-amplify/auth/cognito";
 import { AuthProvider } from "@/context/AuthContextProvider.tsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { Toaster } from "@/components/Toaster.tsx";
+import { Toaster } from "@/components/library/Toaster.tsx";
 
 Amplify.configure({
   Auth: {

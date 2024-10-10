@@ -3,7 +3,7 @@ import {
   BreadcrumbItem,
   BreadcrumbList,
   BreadcrumbSeparator,
-} from "@/components/BreadCrumbs";
+} from "@/components/library/BreadCrumbs";
 import FileViewer from "@/components/FileViewer";
 import { useAuth } from "@/hooks/useAuth";
 import { usePath } from "@/hooks/usePath";

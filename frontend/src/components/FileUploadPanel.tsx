@@ -1,8 +1,8 @@
 import { Dispatch, SetStateAction, useEffect } from "react";
-import { ScrollArea } from "@/components/ScrollArea";
+import { ScrollArea } from "@/components/library/ScrollArea";
 import { FileWithPath } from "react-dropzone";
-import { Separator } from "./Separator";
-import Spinner from "./Spinner";
+import { Separator } from "./library/Separator";
+import Spinner from "./library/Spinner";
 import { useUploadFile, useUploadFileBatch } from "@/hooks/useDirectory";
 import {
   CheckCircledIcon,
