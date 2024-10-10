@@ -1,15 +1,16 @@
 import { callApi } from "@/lib/callApi";
 import { HTTP_METHOD } from "@/lib/enums";
-import { DirectoryItemType } from "@/lib/types";
+import { GetDirectoryResponse } from "@/lib/types";
 import { transformFolderPath } from "@/lib/utils";
 
-export async function getDirectory(
-  parentFolder: string
-): Promise<DirectoryItemType[]> {
+export async function getDirectory(parentFolder: string) {
   const path = transformFolderPath(parentFolder);
   const route = `/directory?parentFolder=${path}`;
 
-  const response = await callApi<DirectoryItemType[]>(route, HTTP_METHOD.GET);
+  const response = await callApi<GetDirectoryResponse | null>(
+    route,
+    HTTP_METHOD.GET
+  );
 
-  return response.data ?? [];
+  return response.data ?? null;
 }

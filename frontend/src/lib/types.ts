@@ -8,6 +8,12 @@ export interface DirectoryItemType {
   size: number;
   type: ItemType;
 }
+
+export interface GetDirectoryResponse {
+  folders: DirectoryItemType[];
+  files: DirectoryItemType[];
+}
+
 export interface UploadFileParams {
   file: FileWithPath;
   uploadPath: string;
@@ -26,6 +32,11 @@ export interface UploadFileBatchParams {
   uploadPath: string;
   user: string;
   overwrite?: boolean;
+}
+
+export interface DownloadFileBatchParams {
+  files: DirectoryItemType[];
+  folderPath: string;
 }
 
 export interface UploadFileAPIArgs extends UploadFileBatchParams {
@@ -51,16 +62,9 @@ export interface ApiResponse<T> {
   data?: T;
 }
 
-export interface UploadPresignedUrlData {
+export interface PresignedUrl {
   fileName: string;
+  fileKey: string;
   status: FILE_STATUS;
   url: string;
-}
-
-export interface DownloadPresignedUrlData extends UploadPresignedUrlData {
-  folderPath: string;
-}
-
-export interface UploadBatchPresignedUrlData extends UploadPresignedUrlData {
-  message: string;
 }

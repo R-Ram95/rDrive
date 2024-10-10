@@ -1,6 +1,6 @@
 import { callApi } from "@/lib/callApi";
 import { HTTP_METHOD } from "@/lib/enums";
-import { UploadPresignedUrlData, UploadFileParams } from "@/lib/types";
+import { UploadFileParams, PresignedUrl } from "@/lib/types";
 import { transformFolderPath } from "@/lib/utils";
 
 export async function uploadFile({
@@ -19,7 +19,7 @@ export async function uploadFile({
     user: user,
   };
 
-  const urlResponse = await callApi<UploadPresignedUrlData>(
+  const urlResponse = await callApi<PresignedUrl>(
     "/files",
     HTTP_METHOD.POST,
     body

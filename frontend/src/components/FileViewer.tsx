@@ -27,11 +27,13 @@ import { FileWithPath, useDropzone } from "react-dropzone";
 import FileUploadPanel from "./FileUploadPanel";
 import { FileMinusIcon, DownloadIcon } from "@radix-ui/react-icons";
 import TableSkeleton from "./Table.skeleton";
+import FilePreview from "./FilePreview";
 
 interface FileViewerProps {
   currentPath: string;
   addPath: (folder: string) => void;
 }
+
 const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
   const { data: directoryData, isLoading: directoryLoading } =
     useListDirectory(currentPath);
@@ -39,6 +41,8 @@ const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
   const [showUploadPanel, setShowUploadPanel] = useState(false);
   const [minUploadPanel, setMinUploadPanel] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
+  const [showFilePreview, setShowFilePreview] = useState(false);
+  const [currentFileIndex, setCurrentFileIndex] = useState(0);
   const { mutate: deleteFile } = useDeleteFile();
   const { mutate: deleteFolder } = useDeleteFolder();
   const { mutate: downloadFile } = useDownloadFile();
@@ -58,6 +62,17 @@ const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
     open();
     setShowUploadPanel(true);
     setMinUploadPanel(false);
+  };
+
+  const handleItemDblClick = (item: DirectoryItemType, itemIndex: number) => {
+    if (item.type === ItemType.FILE) {
+      setCurrentFileIndex(itemIndex);
+      setShowFilePreview(true);
+    }
+  };
+
+  const handleClosePreview = () => {
+    setShowFilePreview(false);
   };
 
   return (
@@ -90,19 +105,52 @@ const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {directoryData?.length === 0 && (
-              <h1 className="text-xl mt-5"> Woah... this folder is empty!</h1>
-            )}
-            {directoryData?.map((item) => (
+            {directoryData?.folders.length === 0 &&
+              directoryData.files.length === 0 && (
+                <h1 className="text-xl mt-5"> Woah... this folder is empty!</h1>
+              )}
+
+            {directoryData?.folders.map((item) => (
               <ContextMenu key={item.key}>
                 <ContextMenuTrigger asChild>
                   <TableRow onClick={() => handleItemClick(item)}>
                     <TableCell className="flex font-medium items-center">
-                      {item.type === ItemType.FILE ? (
-                        <i className="bx bx-file text-lg" />
-                      ) : (
-                        <i className="bx bx-folder text-lg" />
-                      )}
+                      <i className="bx bx-folder text-lg" />
+                      <span className="ml-2">{item.name}</span>
+                    </TableCell>
+                    <TableCell>{item.uploadDate}</TableCell>
+                    <TableCell>-</TableCell>
+                  </TableRow>
+                </ContextMenuTrigger>
+                <ContextMenuContent
+                  className="w-48 bg-background/5 backdrop-blur-xl border-white/10 text-white"
+                  aria-hidden={false}
+                  tabIndex={0}
+                >
+                  <ContextMenuItem
+                    onClick={() =>
+                      deleteFolder({
+                        folderName: item.name,
+                        folderPath: currentPath,
+                      })
+                    }
+                  >
+                    <i className="bx bx-folder-minus text-md" />
+                    <span className="ml-2">Delete Folder</span>
+                  </ContextMenuItem>
+                </ContextMenuContent>
+              </ContextMenu>
+            ))}
+
+            {directoryData?.files.map((item, index) => (
+              <ContextMenu key={item.key}>
+                <ContextMenuTrigger asChild>
+                  <TableRow
+                    onClick={() => handleItemClick(item)}
+                    onDoubleClick={() => handleItemDblClick(item, index)}
+                  >
+                    <TableCell className="flex font-medium items-center">
+                      <i className="bx bx-file text-lg" />
                       <span className="ml-2">{item.name}</span>
                     </TableCell>
                     <TableCell>{item.uploadDate}</TableCell>
@@ -116,44 +164,28 @@ const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
                   aria-hidden={false}
                   tabIndex={0}
                 >
-                  {item.type === ItemType.FILE ? (
-                    <>
-                      <ContextMenuItem
-                        onClick={() =>
-                          deleteFile({
-                            fileName: item.name,
-                            folderPath: currentPath,
-                          })
-                        }
-                      >
-                        <FileMinusIcon className="text-md" />
-                        <span className="ml-2">Delete File</span>
-                      </ContextMenuItem>
-                      <ContextMenuItem
-                        onClick={() =>
-                          downloadFile({
-                            fileName: item.name,
-                            folderPath: currentPath,
-                          })
-                        }
-                      >
-                        <DownloadIcon className="text-md" />
-                        <span className="ml-2">Download File</span>
-                      </ContextMenuItem>
-                    </>
-                  ) : (
-                    <ContextMenuItem
-                      onClick={() =>
-                        deleteFolder({
-                          folderName: item.name,
-                          folderPath: currentPath,
-                        })
-                      }
-                    >
-                      <i className="bx bx-folder-minus text-md" />
-                      <span className="ml-2">Delete Folder</span>
-                    </ContextMenuItem>
-                  )}
+                  <ContextMenuItem
+                    onClick={() =>
+                      deleteFile({
+                        fileName: item.name,
+                        folderPath: currentPath,
+                      })
+                    }
+                  >
+                    <FileMinusIcon className="text-md" />
+                    <span className="ml-2">Delete File</span>
+                  </ContextMenuItem>
+                  <ContextMenuItem
+                    onClick={() =>
+                      downloadFile({
+                        fileName: item.name,
+                        folderPath: currentPath,
+                      })
+                    }
+                  >
+                    <DownloadIcon className="text-md" />
+                    <span className="ml-2">Download File</span>
+                  </ContextMenuItem>
                 </ContextMenuContent>
               </ContextMenu>
             ))}
@@ -189,6 +221,15 @@ const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
           setShowUploadPanel={setShowUploadPanel}
           minimizeUploadPanel={minUploadPanel}
           setMinimizeUploadPanel={setMinUploadPanel}
+        />
+      )}
+
+      {showFilePreview && (
+        <FilePreview
+          currentPath={currentPath}
+          currentFileIndex={currentFileIndex}
+          directoryList={directoryData?.files ?? []}
+          close={handleClosePreview}
         />
       )}
     </div>

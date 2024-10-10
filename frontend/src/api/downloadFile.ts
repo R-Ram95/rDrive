@@ -1,6 +1,6 @@
 import { callApi } from "@/lib/callApi";
 import { FILE_STATUS, HTTP_METHOD } from "@/lib/enums";
-import { DownloadPresignedUrlData } from "@/lib/types";
+import { PresignedUrl } from "@/lib/types";
 import { transformFolderPath } from "@/lib/utils";
 
 export async function downloadFile(folderPath: string, fileName: string) {
@@ -10,7 +10,7 @@ export async function downloadFile(folderPath: string, fileName: string) {
     fileName: fileName,
   };
 
-  const response = await callApi<DownloadPresignedUrlData>(
+  const response = await callApi<PresignedUrl>(
     "/files/download",
     HTTP_METHOD.POST,
     body
