@@ -3,7 +3,6 @@ import { ScrollArea } from "@/components/library/ScrollArea";
 import { FileWithPath } from "react-dropzone";
 import { Separator } from "./library/Separator";
 import Spinner from "./library/Spinner";
-import { useUploadFile, useUploadFileBatch } from "@/hooks/useDirectory";
 import {
   CheckCircledIcon,
   ExclamationTriangleIcon,
@@ -11,6 +10,8 @@ import {
   CaretDownIcon,
   Cross1Icon,
 } from "@radix-ui/react-icons";
+import useFileUploadBatch from "@/hooks/useFileUploadBatch";
+import useUploadFile from "@/hooks/useFileUpload";
 
 interface FileUploadPanelProps {
   files: FileWithPath[];
@@ -27,7 +28,7 @@ const FileUploadPanel = ({
   minimizeUploadPanel,
   setMinimizeUploadPanel,
 }: FileUploadPanelProps) => {
-  const { mutate: uploadFiles, uploadItems } = useUploadFileBatch();
+  const { mutate: uploadFiles, uploadItems } = useFileUploadBatch();
   const { mutate: uploadFile, uploadItem } = useUploadFile();
 
   useEffect(() => {

@@ -1,9 +1,7 @@
-import {
-  useDeleteFile,
-  useDeleteFolder,
-  useDownloadFile,
-  useListDirectory,
-} from "@/hooks/useDirectory";
+import useListDirectory from "@/hooks/useListDirectory";
+import useDeleteFile from "@/hooks/useDeleteFile";
+import useDeleteFolder from "@/hooks/useDeleteFolder";
+import useDownloadFile from "@/hooks/useDownloadFile";
 import {
   Table,
   TableBody,

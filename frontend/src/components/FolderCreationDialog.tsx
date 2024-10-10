@@ -6,8 +6,8 @@ import {
   DialogTitle,
 } from "./library/Dialog";
 import { useToast } from "@/hooks/useToast";
-import { useCreateFolder } from "@/hooks/useDirectory";
 import { ROOT_PATH } from "@/lib/constants";
+import useCreateFolder from "@/hooks/useCreateFolder";
 
 interface FolderCreationDialogProps {
   currentPath: string;

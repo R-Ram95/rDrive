@@ -1,4 +1,4 @@
-import { useDownloadBatchFile } from "@/hooks/useDirectory";
+import useDownloadFileBatch from "@/hooks/useDownloadFileBatch";
 import { DirectoryItemType } from "@/lib/types";
 
 interface FilePreviewProps {
@@ -14,7 +14,7 @@ const FilePreview = ({
   directoryList,
   close,
 }: FilePreviewProps) => {
-  const { data } = useDownloadBatchFile({
+  const { data } = useDownloadFileBatch({
     files: directoryList,
     folderPath: currentPath,
   });
