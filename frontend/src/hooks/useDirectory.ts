@@ -52,38 +52,40 @@ export const useUploadFile = () => {
   const { mutate } = useMutation({
     mutationFn: (data: UploadFileParams) => uploadFile(data),
     onMutate: (inputData: UploadFileParams) => {
+      const { file } = inputData;
       const newFileState: FileState = {
-        ...inputData.file,
-        name: inputData.file.name,
+        ...file,
+        name: file.name,
         isLoading: true,
         isSuccess: false,
         isError: false,
       };
-
       setUploadItem(newFileState);
     },
     onSuccess: (_, inputData) => {
+      const { file, uploadPath } = inputData;
       const newFileState: FileState = {
-        ...inputData.file,
-        name: inputData.file.name,
+        ...file,
+        name: file.name,
         isLoading: false,
         isSuccess: true,
         isError: false,
       };
-
       setUploadItem(newFileState);
 
       toast({
-        title: `${inputData.file.name} uploaded successfully!`,
+        title: "File Uploaded!",
+        description: `${file.name}`,
       });
 
-      const queryKey = ["directory", inputData.uploadPath];
+      const queryKey = ["directory", uploadPath];
       queryClient.invalidateQueries({ queryKey: queryKey });
     },
     onError: (error, inputData) => {
+      const { file } = inputData;
       const newFileState: FileState = {
-        ...inputData.file,
-        name: inputData.file.name,
+        ...file,
+        name: file.name,
         isLoading: false,
         isSuccess: false,
         isError: true,
@@ -91,8 +93,8 @@ export const useUploadFile = () => {
 
       setUploadItem(newFileState);
       toast({
-        title: `Failed to upload ${inputData.file.name}`,
-        description: error.message,
+        title: `File Upload Failed `,
+        description: `${file.name} upload failed due to ${error.message}`,
         variant: "destructive",
       });
     },
@@ -102,21 +104,32 @@ export const useUploadFile = () => {
 };
 
 export const useCreateFolder = () => {
-  const { toast } = useToast();
+  const { toast, dismiss } = useToast();
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
     mutationFn: (data: FolderParams) => createFolder(data),
-    onSuccess: (_, inputData) => {
+    onMutate: (inputData) => {
+      const { folderName } = inputData;
       toast({
-        title: `${inputData.folderName} has been created!`,
+        title: "Creating Folder...",
+        description: `${folderName}`,
       });
-      const queryKey = ["directory", inputData.folderPath];
+    },
+    onSuccess: (_, inputData) => {
+      const { folderName, folderPath } = inputData;
+      dismiss();
+      toast({
+        title: "Folder Created!",
+        description: `${folderName}`,
+      });
+      const queryKey = ["directory", folderPath];
       queryClient.invalidateQueries({ queryKey });
     },
     onError: (error, inputData) => {
+      const { folderName } = inputData;
       toast({
-        title: `Failed to create ${inputData.folderName}`,
-        description: error.message,
+        title: "Folder Creation Failed",
+        description: `${folderName} creation failed due to ${error.message}`,
         variant: "destructive",
       });
     },
@@ -148,8 +161,9 @@ export const useUploadFileBatch = () => {
         onProgressUpdate: updateProgress,
       });
     },
-    onMutate: (data: UploadFileBatchParams) => {
-      const newFiles: FileState[] = data.files.map((file) => {
+    onMutate: (inputData: UploadFileBatchParams) => {
+      const { files } = inputData;
+      const newFiles: FileState[] = files.map((file) => {
         return {
           ...file,
           name: file.name,
@@ -162,16 +176,19 @@ export const useUploadFileBatch = () => {
       setUploadItems(newFiles);
     },
     onSuccess: (_, inputData) => {
-      const queryKey = ["directory", inputData.uploadPath];
+      const { uploadPath } = inputData;
+      const queryKey = ["directory", uploadPath];
       queryClient.invalidateQueries({ queryKey: queryKey });
     },
-    onError: (error) => {
+    onError: (error, inputData) => {
+      const { files } = inputData;
       setUploadItems((prevItems) =>
         prevItems.map((item) => ({ ...item, isError: true, isLoading: false }))
       );
+      const fileNames = files.map((file) => file.name).join(", ");
       toast({
-        title: "File conflict",
-        description: error.message,
+        title: "File Upload Failed",
+        description: `${fileNames} failed to upload due to ${error.message}`,
         variant: "destructive",
       });
     },
@@ -181,22 +198,30 @@ export const useUploadFileBatch = () => {
 };
 
 export const useDeleteFile = () => {
-  const { toast } = useToast();
+  const { toast, dismiss } = useToast();
   const queryClient = useQueryClient();
 
   const { mutate } = useMutation({
-    mutationFn: (data: FileParams) => deleteFile(data),
+    mutationFn: (inputData: FileParams) => deleteFile(inputData),
+    onMutate: (inputData) => {
+      const { fileName } = inputData;
+      toast({ title: "Deleting File...", description: `${fileName}` });
+    },
     onSuccess: (_, inputData) => {
+      const { fileName } = inputData;
+      dismiss();
       toast({
-        title: `${inputData.fileName} has been deleted!`,
+        title: "File Deleted!",
+        description: `${fileName}`,
       });
       const queryKey = ["directory", inputData.folderPath];
       queryClient.invalidateQueries({ queryKey: queryKey });
     },
     onError: (error, inputData) => {
+      const { fileName } = inputData;
       toast({
-        title: `Failed to delete ${inputData.fileName} :(`,
-        description: error.message,
+        title: "File Deletion Failed",
+        description: `Failed to delete ${fileName} due to ${error.message}`,
         variant: "destructive",
       });
     },
@@ -206,22 +231,28 @@ export const useDeleteFile = () => {
 };
 
 export const useDeleteFolder = () => {
-  const { toast } = useToast();
+  const { toast, dismiss } = useToast();
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
-    mutationFn: (data: FolderParams) => deleteFolder(data),
+    mutationFn: (inputData: FolderParams) => deleteFolder(inputData),
+    onMutate: (inputData) => {
+      const { folderName } = inputData;
+      toast({ title: "Deleting Folder...", description: `${folderName}` });
+    },
     onSuccess: (_, inputData) => {
       const queryKey = ["directory", inputData.folderPath];
       queryClient.invalidateQueries({ queryKey: queryKey });
-
+      dismiss();
       toast({
-        title: `${inputData.folderName} has been deleted!`,
+        title: "Folder Deleted",
+        description: `${inputData.folderName}`,
       });
     },
     onError: (error, inputData) => {
+      const { folderName } = inputData;
       toast({
-        title: `Failed to delete ${inputData.folderName} :(`,
-        description: error.message,
+        title: `Folder Deletion Failed`,
+        description: `Failed to delete ${folderName} due to ${error.message}`,
         variant: "destructive",
       });
     },
@@ -231,9 +262,16 @@ export const useDeleteFolder = () => {
 };
 
 export const useDownloadFile = () => {
+  const { toast, dismiss } = useToast();
   const { mutate } = useMutation({
     mutationFn: (data: FileParams) =>
       downloadFile(data.folderPath, data.fileName),
+    onMutate: (inputData) => {
+      toast({
+        title: "File Downloading...",
+        description: `${inputData.fileName}`,
+      });
+    },
     onSuccess: async (data, inputData) => {
       const blob = await data.blob();
       const downloadUrl = window.URL.createObjectURL(blob);
@@ -244,6 +282,15 @@ export const useDownloadFile = () => {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(downloadUrl);
+      dismiss();
+    },
+    onError: (error, inputData) => {
+      const { fileName } = inputData;
+      toast({
+        title: "Download Failure",
+        description: `Failed to download${fileName} due to ${error.message}`,
+        variant: "destructive",
+      });
     },
   });
 

@@ -73,10 +73,7 @@ export async function generateFileUploadUrl({
   overwrite = false,
 }: GenerateFileUploadUrlArgs) {
   const { fileName, folderPath } = file;
-  const key =
-    folderPath === "/"
-      ? `${folderPath}${fileName}`
-      : `${folderPath}/${fileName}`;
+  const key = `${folderPath}${fileName}`;
 
   try {
     if (!overwrite) {
