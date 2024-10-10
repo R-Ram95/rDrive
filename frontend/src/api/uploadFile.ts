@@ -1,6 +1,7 @@
 import { callApi } from "@/lib/callApi";
 import { HTTP_METHOD } from "@/lib/enums";
 import { UploadPresignedUrlData, UploadFileParams } from "@/lib/types";
+import { transformFolderPath } from "@/lib/utils";
 
 export async function uploadFile({
   file,
@@ -8,10 +9,11 @@ export async function uploadFile({
   user,
   overwrite = false,
 }: UploadFileParams) {
+  const path = transformFolderPath(uploadPath);
   const body = {
     file: {
       fileName: file.name,
-      folderPath: `${uploadPath}/`,
+      folderPath: path,
       overwrite: overwrite,
     },
     user: user,

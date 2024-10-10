@@ -1,6 +1,7 @@
 import { callApi } from "@/lib/callApi";
 import { FILE_STATUS, HTTP_METHOD } from "@/lib/enums";
 import { UploadBatchPresignedUrlData, UploadFileAPIArgs } from "@/lib/types";
+import { transformFolderPath } from "@/lib/utils";
 
 export async function uploadFileBatch({
   files,
@@ -9,9 +10,10 @@ export async function uploadFileBatch({
   onProgressUpdate,
   overwrite = false,
 }: UploadFileAPIArgs) {
+  const path = transformFolderPath(uploadPath);
   const filesRequest = files.map((file) => {
     return {
-      folderPath: `${uploadPath}/`,
+      folderPath: path,
       fileName: file.name,
       overwrite: overwrite,
     };
