@@ -21,6 +21,26 @@ import { ConflictError } from "./lambda-helper";
 const s3Client = new S3Client({ region: process.env.REGION });
 const bucketName = process.env.BUCKET_NAME;
 
+function getMimeTypeFromExtension(extension = "txt") {
+  return (
+    {
+      jpeg: "image/jpeg",
+      jpg: "image/jpeg",
+      mp4: "video/mp4",
+      mpeg: "video/mpeg",
+      ogv: "video/ogg",
+      png: "image/png",
+      tif: "image/tiff",
+      tiff: "image/tiff",
+      ts: "video/mp2t",
+      webm: "video/webm",
+      webp: "image/webp",
+      "3gp": "video/3gpp",
+      "3g2": "video/3gpp2",
+    }[extension] || "application/octet-stream"
+  );
+}
+
 export async function checkIfObjectExists({
   key,
   bucketName,
@@ -100,27 +120,33 @@ export async function generateFileUploadUrl({
   }
 }
 
-export async function generateFileDownloaddUrl({
-  fileKey,
+export async function generateFileDownloadUrl({
+  folderPath,
+  fileName,
   bucketName,
 }: GenerateFileDownloadUrlArgs) {
   try {
+    const key = `${folderPath}${fileName}`;
     const fileExists = await checkIfObjectExists({
-      key: fileKey,
+      key: key,
       bucketName,
     });
 
     if (!fileExists)
       return {
-        fileKey: fileKey,
+        fileKey: key,
         status: FILE_STATUS.CONFLICT,
-        message: `File with key ${fileKey} does not exist`,
+        message: `File ${fileName} does not exist in ${folderPath}`,
         url: "",
       };
 
+    const mimeType = getMimeTypeFromExtension(fileName.split(".")[1]);
+
     const inputCommand: GetObjectRequest = {
       Bucket: bucketName,
-      Key: fileKey,
+      Key: key,
+      ResponseContentDisposition: `attachment; filename="${fileName}"`,
+      ResponseContentType: `${mimeType}`,
     };
 
     const command = new GetObjectCommand(inputCommand);
@@ -131,7 +157,8 @@ export async function generateFileDownloaddUrl({
     }); // 5 Minutes
 
     return {
-      fileKey: fileKey,
+      fileName: fileName,
+      folderPath: folderPath,
       status: FILE_STATUS.CREATED,
       message: "Request successful: presigned url generated",
       url: preSignedUrl,

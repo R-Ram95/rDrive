@@ -39,9 +39,9 @@ const apiConfig = [
   },
   {
     functionName: "FileDownload",
-    endpoint: `/files`,
+    endpoint: `/files/download`,
     entryFile: path.join(lambdasDir, "files", "file-download.ts"),
-    methods: [HttpMethod.GET],
+    methods: [HttpMethod.POST],
     permission: PERMISION.READ,
   },
   {
@@ -60,9 +60,9 @@ const apiConfig = [
   },
   {
     functionName: "BatchFileDownload",
-    endpoint: `/files/batch`,
+    endpoint: `/files/download/batch`,
     entryFile: path.join(lambdasDir, "files", "file-download-batch.ts"),
-    methods: [HttpMethod.GET],
+    methods: [HttpMethod.POST],
     permission: PERMISION.READ,
   },
   {

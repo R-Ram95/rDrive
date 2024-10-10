@@ -1,11 +1,12 @@
 import { APIGatewayEvent } from "aws-lambda";
 import { createResponse } from "../../utils/lambda-helper";
-import { generateFileDownloaddUrl } from "../../utils/s3-helper";
+import { generateFileDownloadUrl } from "../../utils/s3-helper";
+import { File } from "../../utils/types";
 
 const bucketName = process.env.BUCKET_NAME;
 
 export const handler = async (event: APIGatewayEvent) => {
-  const requestBody: { files: string[] } = event.body
+  const requestBody: { files: File[] } = event.body
     ? JSON.parse(event.body)
     : {};
 
@@ -22,8 +23,9 @@ export const handler = async (event: APIGatewayEvent) => {
 
   try {
     const promises = files.map((file) => {
-      return generateFileDownloaddUrl({
-        fileKey: file,
+      return generateFileDownloadUrl({
+        fileName: file.fileName,
+        folderPath: file.folderPath,
         bucketName,
       });
     });

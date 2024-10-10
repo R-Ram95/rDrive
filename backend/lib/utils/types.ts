@@ -19,7 +19,8 @@ export interface GenerateFileUploadUrlArgs {
 }
 
 export interface GenerateFileDownloadUrlArgs {
-  fileKey: string;
+  folderPath: string;
+  fileName: string;
   bucketName: string | undefined;
 }
 
