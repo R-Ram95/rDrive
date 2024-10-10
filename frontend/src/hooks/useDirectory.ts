@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  DirectoryItemType,
+  DownloadFileBatchParams,
   FileParams,
   FileState,
   FolderParams,
+  GetDirectoryResponse,
   UploadFileBatchParams,
   UploadFileParams,
 } from "@/lib/types";
@@ -18,28 +19,38 @@ import { uploadFileBatch } from "@/api/uploadFileBatch";
 import { deleteFile } from "@/api/deleteFile";
 import { deleteFolder } from "@/api/deleteFolder";
 import { downloadFile } from "@/api/downloadFile";
+import { downloadFileBatch } from "@/api/downloadFileBatch";
 
 export const useListDirectory = (parentFolder: string) => {
   const queryKey = ["directory", parentFolder];
 
-  const { data, isLoading, isError, isSuccess } = useQuery<DirectoryItemType[]>(
-    {
+  const { data, isLoading, isError, isSuccess } =
+    useQuery<GetDirectoryResponse | null>({
       queryKey: queryKey,
       queryFn: () => getDirectory(parentFolder),
       select(data) {
-        return data.map((item) => {
-          return {
-            ...item,
-            uploadDate:
-              item.type === ItemType.FILE
-                ? dayjs(item.uploadDate).format("MM-DD-YYYY")
-                : "-",
-            size: Math.floor(item.size / 1000),
-          };
-        });
+        return {
+          folders:
+            data?.folders.map((item) => ({
+              ...item,
+              uploadDate:
+                item.type === ItemType.FILE
+                  ? dayjs(item.uploadDate).format("MM-DD-YYYY")
+                  : "-",
+              size: Math.floor(item.size / 1000),
+            })) ?? [],
+          files:
+            data?.files.map((item) => ({
+              ...item,
+              uploadDate:
+                item.type === ItemType.FILE
+                  ? dayjs(item.uploadDate).format("MM-DD-YYYY")
+                  : "-",
+              size: Math.floor(item.size / 1000),
+            })) ?? [],
+        };
       },
-    }
-  );
+    });
 
   return { data, isLoading, isError, isSuccess };
 };
@@ -295,4 +306,17 @@ export const useDownloadFile = () => {
   });
 
   return { mutate };
+};
+
+export const useDownloadBatchFile = ({
+  files,
+  folderPath,
+}: DownloadFileBatchParams) => {
+  const queryKey = ["/files", folderPath];
+  const { data, isLoading, isError } = useQuery({
+    queryKey,
+    queryFn: () => downloadFileBatch({ files, folderPath }),
+  });
+
+  return { data, isLoading, isError };
 };
