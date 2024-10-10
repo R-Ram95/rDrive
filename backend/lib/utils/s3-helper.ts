@@ -231,7 +231,10 @@ export async function listDirectory(parentFolder: string) {
         })
       : [];
 
-  return subFolders.concat(files);
+  return {
+    folders: subFolders,
+    files: files,
+  };
 }
 
 async function dirIsEmpty(directory: string) {
