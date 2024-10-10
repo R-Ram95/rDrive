@@ -51,12 +51,16 @@ export interface ApiResponse<T> {
   data?: T;
 }
 
-export interface PresignedUrlData {
+export interface UploadPresignedUrlData {
   fileName: string;
   status: FILE_STATUS;
   url: string;
 }
 
-export interface BatchPresignedUrlData extends PresignedUrlData {
+export interface DownloadPresignedUrlData extends UploadPresignedUrlData {
+  folderPath: string;
+}
+
+export interface UploadBatchPresignedUrlData extends UploadPresignedUrlData {
   message: string;
 }

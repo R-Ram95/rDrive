@@ -17,6 +17,7 @@ import { useState } from "react";
 import { uploadFileBatch } from "@/api/uploadFileBatch";
 import { deleteFile } from "@/api/deleteFile";
 import { deleteFolder } from "@/api/deleteFolder";
+import { downloadFile } from "@/api/downloadFile";
 
 export const useListDirectory = (parentFolder: string) => {
   const queryKey = ["directory", parentFolder];
@@ -223,6 +224,26 @@ export const useDeleteFolder = () => {
         description: error.message,
         variant: "destructive",
       });
+    },
+  });
+
+  return { mutate };
+};
+
+export const useDownloadFile = () => {
+  const { mutate } = useMutation({
+    mutationFn: (data: FileParams) =>
+      downloadFile(data.folderPath, data.fileName),
+    onSuccess: async (data, inputData) => {
+      const blob = await data.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = inputData.fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
     },
   });
 

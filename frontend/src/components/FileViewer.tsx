@@ -1,6 +1,7 @@
 import {
   useDeleteFile,
   useDeleteFolder,
+  useDownloadFile,
   useListDirectory,
 } from "@/hooks/useDirectory";
 import {
@@ -24,7 +25,7 @@ import { Dialog } from "./Dialog";
 import FolderCreationDialog from "./FolderCreationDialog";
 import { FileWithPath, useDropzone } from "react-dropzone";
 import FileUploadPanel from "./FileUploadPanel";
-import { FileMinusIcon } from "@radix-ui/react-icons";
+import { FileMinusIcon, DownloadIcon } from "@radix-ui/react-icons";
 
 interface FileViewerProps {
   currentPath: string;
@@ -38,6 +39,7 @@ const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const { mutate: deleteFile } = useDeleteFile();
   const { mutate: deleteFolder } = useDeleteFolder();
+  const { mutate: downloadFile } = useDownloadFile();
 
   const { acceptedFiles, getRootProps, getInputProps, open } = useDropzone({
     noClick: true,
@@ -108,17 +110,30 @@ const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
                 tabIndex={0}
               >
                 {item.type === ItemType.FILE ? (
-                  <ContextMenuItem
-                    onClick={() =>
-                      deleteFile({
-                        fileName: item.name,
-                        folderPath: currentPath,
-                      })
-                    }
-                  >
-                    <FileMinusIcon className="text-md" />
-                    <span className="ml-2">Delete File</span>
-                  </ContextMenuItem>
+                  <>
+                    <ContextMenuItem
+                      onClick={() =>
+                        deleteFile({
+                          fileName: item.name,
+                          folderPath: currentPath,
+                        })
+                      }
+                    >
+                      <FileMinusIcon className="text-md" />
+                      <span className="ml-2">Delete File</span>
+                    </ContextMenuItem>
+                    <ContextMenuItem
+                      onClick={() =>
+                        downloadFile({
+                          fileName: item.name,
+                          folderPath: currentPath,
+                        })
+                      }
+                    >
+                      <DownloadIcon className="text-md" />
+                      <span className="ml-2">Download File</span>
+                    </ContextMenuItem>
+                  </>
                 ) : (
                   <ContextMenuItem
                     onClick={() =>

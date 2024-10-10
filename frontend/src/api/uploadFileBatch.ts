@@ -1,6 +1,6 @@
 import { callApi } from "@/lib/callApi";
 import { FILE_STATUS, HTTP_METHOD } from "@/lib/enums";
-import { BatchPresignedUrlData, UploadFileAPIArgs } from "@/lib/types";
+import { UploadBatchPresignedUrlData, UploadFileAPIArgs } from "@/lib/types";
 
 export async function uploadFileBatch({
   files,
@@ -21,7 +21,7 @@ export async function uploadFileBatch({
     user: user,
   };
 
-  const urlResponse = await callApi<BatchPresignedUrlData[]>(
+  const urlResponse = await callApi<UploadBatchPresignedUrlData[]>(
     "/files/batch",
     HTTP_METHOD.POST,
     body
