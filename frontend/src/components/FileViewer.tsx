@@ -218,13 +218,15 @@ const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
         />
       )}
 
-      <ImageViewer
-        currentPath={currentPath}
-        currentFileIndex={currentFileIndex}
-        directoryList={directoryData?.files ?? []}
-        show={showImageViewer}
-        close={() => setShowImageViewer(false)}
-      />
+      {showImageViewer && (
+        <ImageViewer
+          currentPath={currentPath}
+          currentFileIndex={currentFileIndex}
+          directoryList={directoryData?.files ?? []}
+          show={showImageViewer}
+          close={() => setShowImageViewer(false)}
+        />
+      )}
     </div>
   );
 };

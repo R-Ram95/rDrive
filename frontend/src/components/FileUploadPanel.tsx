@@ -74,28 +74,30 @@ const FileUploadPanel = ({
         <ScrollArea className="h-64 p-0 bg-white/10 backdrop-blur-sm">
           <Separator className=" bg-white/20" />
           <div className=" w-full">
-            {[...uploadItems, uploadItem].map((item) => (
-              <div
-                key={item?.name}
-                className="border-t p-2 last:border-b bg-background/70 backdrop-blur-xl"
-              >
-                <div className="flex justify-between items-center pr-2">
-                  <div className="flex items-center">
-                    <i className="bx bx-file text-lg" />
-                    <span className="text-sm font-medium ml-2">
-                      {item?.name}
-                    </span>
+            {[...uploadItems, uploadItem]
+              .filter((item) => item !== undefined)
+              .map((item) => (
+                <div
+                  key={item?.name}
+                  className="border-t p-2 last:border-b bg-background/70 backdrop-blur-xl"
+                >
+                  <div className="flex justify-between items-center pr-2">
+                    <div className="flex items-center">
+                      <i className="bx bx-file text-lg" />
+                      <span className="text-sm font-medium ml-2">
+                        {item?.name}
+                      </span>
+                    </div>
+                    {item?.isLoading && <Spinner className="w-5 h-5" />}
+                    {item?.isSuccess && (
+                      <CheckCircledIcon className="w-5 h-5 text-green-500" />
+                    )}
+                    {item?.isError && (
+                      <ExclamationTriangleIcon className="w-5 h-5 text-red-500" />
+                    )}
                   </div>
-                  {item?.isLoading && <Spinner className="w-5 h-5" />}
-                  {item?.isSuccess && (
-                    <CheckCircledIcon className="w-5 h-5 text-green-500" />
-                  )}
-                  {item?.isError && (
-                    <ExclamationTriangleIcon className="w-5 h-5 text-red-500" />
-                  )}
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         </ScrollArea>
       )}
