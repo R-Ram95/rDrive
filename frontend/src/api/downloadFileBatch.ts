@@ -1,14 +1,16 @@
 import { callApi } from "@/lib/callApi";
 import { HTTP_METHOD } from "@/lib/enums";
 import { DownloadFileBatchParams, PresignedUrl } from "@/lib/types";
+import { transformFolderPath } from "@/lib/utils";
 
 export async function downloadFileBatch({
   files,
   folderPath,
 }: DownloadFileBatchParams) {
+  const path = transformFolderPath(folderPath);
   const body = {
     files: files.map((file) => ({
-      folderPath: folderPath,
+      folderPath: path,
       fileName: file.name,
     })),
   };

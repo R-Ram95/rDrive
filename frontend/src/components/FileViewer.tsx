@@ -25,7 +25,7 @@ import { FileWithPath, useDropzone } from "react-dropzone";
 import FileUploadPanel from "./FileUploadPanel";
 import { FileMinusIcon, DownloadIcon } from "@radix-ui/react-icons";
 import TableSkeleton from "./Table.skeleton";
-import FilePreview from "./FilePreview";
+import ImageViewer from "./ImagePreview";
 
 interface FileViewerProps {
   currentPath: string;
@@ -39,7 +39,7 @@ const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
   const [showUploadPanel, setShowUploadPanel] = useState(false);
   const [minUploadPanel, setMinUploadPanel] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
-  const [showFilePreview, setShowFilePreview] = useState(false);
+  const [showImageViewer, setShowImageViewer] = useState(false);
   const [currentFileIndex, setCurrentFileIndex] = useState(0);
   const { mutate: deleteFile } = useDeleteFile();
   const { mutate: deleteFolder } = useDeleteFolder();
@@ -65,12 +65,8 @@ const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
   const handleItemDblClick = (item: DirectoryItemType, itemIndex: number) => {
     if (item.type === ItemType.FILE) {
       setCurrentFileIndex(itemIndex);
-      setShowFilePreview(true);
+      setShowImageViewer(true);
     }
-  };
-
-  const handleClosePreview = () => {
-    setShowFilePreview(false);
   };
 
   return (
@@ -222,14 +218,13 @@ const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
         />
       )}
 
-      {showFilePreview && (
-        <FilePreview
-          currentPath={currentPath}
-          currentFileIndex={currentFileIndex}
-          directoryList={directoryData?.files ?? []}
-          close={handleClosePreview}
-        />
-      )}
+      <ImageViewer
+        currentPath={currentPath}
+        currentFileIndex={currentFileIndex}
+        directoryList={directoryData?.files ?? []}
+        show={showImageViewer}
+        close={() => setShowImageViewer(false)}
+      />
     </div>
   );
 };

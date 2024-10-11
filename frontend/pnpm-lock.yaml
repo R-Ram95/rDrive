@@ -65,6 +65,9 @@ dependencies:
   react-router-dom:
     specifier: ^6.26.2
     version: 6.26.2(react-dom@18.3.1)(react@18.3.1)
+  react-viewer:
+    specifier: ^3.2.2
+    version: 3.2.2
   tailwind-merge:
     specifier: ^2.5.3
     version: 2.5.3
@@ -3523,6 +3526,10 @@ packages:
       clsx: 2.0.0
     dev: false
 
+  /classnames@2.5.1:
+    resolution: {integrity: sha512-saHYOzhIQs6wy2sVxTM6bUDsQO4F50V9RQ22qBpEdCW+I+/Wmke2HOl6lS6dTpdxVhb88/I6+Hs+438c3lfUow==}
+    dev: false
+
   /cliui@6.0.0:
     resolution: {integrity: sha512-t6wbgtoCXvAzst7QgXxJYqPt0usEfbgQdftEPbLL/cvv6HPE5VgvqCuAIDR0NgU52ds6rFwqrgakNLrHEjCbrQ==}
     dependencies:
@@ -4581,6 +4588,12 @@ packages:
       invariant: 2.2.4
       react: 18.3.1
       tslib: 2.7.0
+    dev: false
+
+  /react-viewer@3.2.2:
+    resolution: {integrity: sha512-DHOq1x6cXsAViY43204ILRzLVR5ovP1MgzsC+LzZCWlInRuHjzAgpQZ8GzWm1CkiNYuHGwCxH36X0JUHl2xDSg==}
+    dependencies:
+      classnames: 2.5.1
     dev: false
 
   /react@18.3.1:
