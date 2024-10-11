@@ -13,4 +13,13 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    minify: "esbuild",
+    rollupOptions: {
+      output: {
+        entryFileNames: "assets/index.js",
+        assetFileNames: "assets/index.css",
+      },
+    },
+  },
 });

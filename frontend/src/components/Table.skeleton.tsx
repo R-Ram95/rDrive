@@ -13,15 +13,9 @@ const TableSkeleton = () => {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>
-            <Skeleton className="h-8 w-2/3" />
-          </TableHead>
-          <TableHead>
-            <Skeleton className="h-8 w-2/3" />
-          </TableHead>
-          <TableHead>
-            <Skeleton className="h-8 w-2/3" />
-          </TableHead>
+          <TableHead>Name</TableHead>
+          <TableHead>Last Modified</TableHead>
+          <TableHead>File Size</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>

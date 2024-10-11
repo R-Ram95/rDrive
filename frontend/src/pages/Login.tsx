@@ -41,7 +41,7 @@ const Login = () => {
     }
 
     try {
-      const response = await signIn({
+      await signIn({
         username: form.elements.username.value,
         password: form.elements.password.value,
       });
