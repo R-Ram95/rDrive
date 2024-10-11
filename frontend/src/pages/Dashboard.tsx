@@ -70,9 +70,12 @@ const Dashboard = () => {
               className="flex flex-row items-center gap-1 text-sm text-white  border-white/20 hover:border-white/80 border bg-transparent px-2 py-1 rounded-lg hover:bg-white/10"
             >
               <FilePlusIcon />
-              <span>Upload File</span>
+              <span>Upload File(s)</span>
             </button>
-            <button className="flex flex-row items-center gap-1 text-sm text-white  border-white/20 hover:border-white/80 border bg-transparent px-2 py-1 rounded-lg hover:bg-white/10">
+            <button
+              onClick={() => setOpenFolderDialog(true)}
+              className="flex flex-row items-center gap-1 text-sm text-white  border-white/20 hover:border-white/80 border bg-transparent px-2 py-1 rounded-lg hover:bg-white/10"
+            >
               <i className="bx bx-folder-plus" />
               <span>Create Folder</span>
             </button>
