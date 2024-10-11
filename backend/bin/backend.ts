@@ -6,6 +6,7 @@ import { AuthStack } from "../lib/stacks/auth-stack";
 import { DnsStack } from "../lib/stacks/dns-stack";
 import { StorageStack } from "../lib/stacks/storage-stack";
 import * as dotenv from "dotenv";
+import { Tags } from "aws-cdk-lib";
 dotenv.config();
 
 const APP_NAME = process.env.APP_NAME!;
@@ -28,6 +29,9 @@ const dnsStack = new DnsStack(app, `${APP_NAME}-DnsStack`, {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEFAULT_REGION,
   },
+  tags: {
+    AppName: APP_NAME,
+  },
 });
 
 const storageStack = new StorageStack(app, `${APP_NAME}-StorageStack`, {
@@ -35,6 +39,9 @@ const storageStack = new StorageStack(app, `${APP_NAME}-StorageStack`, {
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEFAULT_REGION,
+  },
+  tags: {
+    AppName: APP_NAME,
   },
 });
 
@@ -48,6 +55,14 @@ const apiStack = new APIStack(app, `${APP_NAME}-ApiStack`, {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEFAULT_REGION,
   },
+  tags: {
+    AppName: APP_NAME,
+  },
 });
+
+Tags.of(authStack).add("AppName", APP_NAME);
+Tags.of(dnsStack).add("AppName", APP_NAME);
+Tags.of(storageStack).add("AppName", APP_NAME);
+Tags.of(apiStack).add("AppName", APP_NAME);
 
 app.synth();
