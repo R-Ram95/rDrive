@@ -51,7 +51,7 @@ const Dashboard = () => {
         <div className="flex flex-row justify-between items-center mt-5">
           <Breadcrumb>
             <BreadcrumbList className="text-lg text-white">
-              {pathFragments.map((fragment) => (
+              {pathFragments.map((fragment, index) => (
                 <div className="flex items-center" key={fragment}>
                   <BreadcrumbItem
                     className="hover:cursor-pointer hover:bg-slate-50/10 rounded-full py-1 px-2 "
@@ -59,7 +59,10 @@ const Dashboard = () => {
                   >
                     {fragment === ROOT_PATH ? "Home" : fragment}
                   </BreadcrumbItem>
-                  {pathFragments.length > 1 && <BreadcrumbSeparator />}
+                  {pathFragments.length > 1 &&
+                    index !== pathFragments.length - 1 && (
+                      <BreadcrumbSeparator />
+                    )}
                 </div>
               ))}
             </BreadcrumbList>
