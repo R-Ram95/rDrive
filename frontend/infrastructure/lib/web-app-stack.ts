@@ -6,7 +6,8 @@ import {
 } from "aws-cdk-lib/aws-certificatemanager";
 import { Distribution, ViewerProtocolPolicy } from "aws-cdk-lib/aws-cloudfront";
 import { S3BucketOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
-import { HostedZone } from "aws-cdk-lib/aws-route53";
+import { ARecord, HostedZone, RecordTarget } from "aws-cdk-lib/aws-route53";
+import { CloudFrontTarget } from "aws-cdk-lib/aws-route53-targets";
 import {
   BlockPublicAccess,
   Bucket,
@@ -29,7 +30,6 @@ export class WebAppStack extends cdk.Stack {
 
     if (!appName || !rootDomain) return;
 
-    /** STORAGE */
     const assetBucket = new Bucket(this, `${appName}-WebAppBucket`, {
       versioned: true,
       bucketName: `${props?.appName.toLowerCase()}-web-app-bucket-${
@@ -41,7 +41,6 @@ export class WebAppStack extends cdk.Stack {
       objectOwnership: ObjectOwnership.BUCKET_OWNER_ENFORCED,
     });
 
-    /** DNS */
     const hostedZone = HostedZone.fromLookup(this, `HostedZone`, {
       domainName: rootDomain ?? "",
     });
@@ -52,18 +51,33 @@ export class WebAppStack extends cdk.Stack {
       validation: CertificateValidation.fromDns(hostedZone),
     });
 
-    /** CDN */
-    new Distribution(this, `${appName}-WebAppDistribution`, {
-      defaultBehavior: {
-        origin: S3BucketOrigin.withOriginAccessControl(assetBucket),
-        viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-      },
-      defaultRootObject: "index.html",
-      certificate: certificate,
-      domainNames: [
-        `${appName.toLowerCase()}.${rootDomain}`,
-        `www.${appName.toLowerCase()}.${rootDomain}`,
-      ],
+    const distribution = new Distribution(
+      this,
+      `${appName}-WebAppDistribution`,
+      {
+        defaultBehavior: {
+          origin: S3BucketOrigin.withOriginAccessControl(assetBucket),
+          viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        },
+        defaultRootObject: "index.html",
+        certificate: certificate,
+        domainNames: [
+          `${appName.toLowerCase()}.${rootDomain}`,
+          `www.${appName.toLowerCase()}.${rootDomain}`,
+        ],
+      }
+    );
+
+    new ARecord(this, `${appName}-WebAppAliasRecord`, {
+      zone: hostedZone,
+      target: RecordTarget.fromAlias(new CloudFrontTarget(distribution)),
+      recordName: `${appName.toLowerCase()}.${rootDomain}`,
+    });
+
+    new ARecord(this, `${appName}-WebAppWWWAliasRecord`, {
+      zone: hostedZone,
+      target: RecordTarget.fromAlias(new CloudFrontTarget(distribution)),
+      recordName: `www.${appName.toLowerCase()}.${rootDomain}`,
     });
 
     new BucketDeployment(this, "WebAppBucketDeployment", {
