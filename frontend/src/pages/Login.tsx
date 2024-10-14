@@ -59,10 +59,10 @@ const Login = () => {
 
   return (
     <div className="flex flex-col items-center h-screen justify-center bg-[url('/image.png')] bg-cover bg-no-repeat bg-center">
-      <div className="flex flex-col w-96 py-20 px-11 rounded-xl bg-transparent border border-white/20 backdrop-blur-lg shadow-2xl font-medium">
+      <div className="flex flex-col max-w-96 py-20 px-11 rounded-xl bg-transparent border border-white/20 backdrop-blur-lg shadow-2xl font-medium">
         <form onSubmit={handleSubmit}>
           <h1 className="text-3xl text-center text-white font-semibold">
-            r/Drive
+            r:Drive
           </h1>
           <div className="relative w-full my-6 mx-0 h-11 text-white">
             <input
