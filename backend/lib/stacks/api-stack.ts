@@ -106,7 +106,10 @@ export class APIStack extends Stack {
         domainName: props.gatewayDomain,
       },
       corsPreflight: {
-        allowOrigins: [`https://${props.webAppDomain}`],
+        allowOrigins: [
+          `https://${props.webAppDomain}`,
+          `https://www.${props.webAppDomain}`,
+        ],
         allowMethods: [
           CorsHttpMethod.GET,
           CorsHttpMethod.PUT,

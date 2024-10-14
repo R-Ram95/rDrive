@@ -41,7 +41,10 @@ export class StorageStack extends Stack {
       ],
       cors: [
         {
-          allowedOrigins: [`https://${props.webAppDomain}`],
+          allowedOrigins: [
+            `https://${props.webAppDomain}`,
+            `https://www.${props.webAppDomain}`,
+          ],
           allowedMethods: [HttpMethods.PUT, HttpMethods.GET],
           allowedHeaders: ["*"],
           exposedHeaders: ["ETag"],

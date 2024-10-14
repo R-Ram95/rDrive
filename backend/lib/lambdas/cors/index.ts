@@ -10,10 +10,19 @@ enum CorsHttpMethod {
 }
 
 export async function handler(event: APIGatewayEvent) {
+  const allowedOrigins = [
+    `https://${webAppDomain}`,
+    `https://www.${webAppDomain}`,
+  ];
+
+  const origin = event.headers.origin ?? "";
+  const isOriginAllowed = allowedOrigins.includes(origin);
   return {
     statusCode: 200,
     headers: {
-      "Access-Control-Allow-Origin": `https://${webAppDomain}`,
+      "Access-Control-Allow-Origin": isOriginAllowed
+        ? origin
+        : allowedOrigins[0],
       "Access-Control-Allow-Methods": `${CorsHttpMethod.GET},${CorsHttpMethod.DELETE},${CorsHttpMethod.POST},${CorsHttpMethod.PUT}`,
       "Access-Control-Allow-Headers": "Content-Type,Authorization",
     },
