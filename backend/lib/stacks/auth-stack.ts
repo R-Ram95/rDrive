@@ -40,7 +40,6 @@ export class AuthStack extends Stack {
         emailSubject: `Welcome to ${formattedAppName} - cloud storage for your videos and images`,
         emailBody: `Hello {username},\n\nThis is your invitation to join ${formattedAppName}! Your temporary password is {####}. Please use it to sign in and change your password - it expires in 7 days.\n\n Thank you,\nr:Drive developer <3`,
       },
-      removalPolicy: RemovalPolicy.DESTROY, // DEV ONLY REMOVE IN PROD
     });
 
     // create app client

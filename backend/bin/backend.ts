@@ -9,8 +9,9 @@ import * as dotenv from "dotenv";
 import { Tags } from "aws-cdk-lib";
 dotenv.config();
 
-const APP_NAME = process.env.APP_NAME!;
-const ROOT_DOMAIN = process.env.ROOT_DOMAIN!;
+const APP_NAME = process.env.APP_NAME ?? "";
+const ROOT_DOMAIN = process.env.ROOT_DOMAIN ?? "";
+const WEB_APP_DOMAIN = process.env.WEB_APP_DOMAIN ?? "";
 
 const app = new cdk.App();
 
@@ -29,24 +30,20 @@ const dnsStack = new DnsStack(app, `${APP_NAME}-DnsStack`, {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEFAULT_REGION,
   },
-  tags: {
-    AppName: APP_NAME,
-  },
 });
 
 const storageStack = new StorageStack(app, `${APP_NAME}-StorageStack`, {
   appName: APP_NAME,
+  webAppDomain: WEB_APP_DOMAIN,
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEFAULT_REGION,
-  },
-  tags: {
-    AppName: APP_NAME,
   },
 });
 
 const apiStack = new APIStack(app, `${APP_NAME}-ApiStack`, {
   appName: APP_NAME,
+  webAppDomain: WEB_APP_DOMAIN,
   userPool: authStack.userPool,
   appClient: authStack.appClient,
   gatewayDomain: dnsStack.domainName,
@@ -54,9 +51,6 @@ const apiStack = new APIStack(app, `${APP_NAME}-ApiStack`, {
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEFAULT_REGION,
-  },
-  tags: {
-    AppName: APP_NAME,
   },
 });
 

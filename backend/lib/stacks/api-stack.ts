@@ -16,6 +16,7 @@ import * as path from "path";
 
 interface APIStackProps extends StackProps {
   appName: string;
+  webAppDomain: string;
   userPool: UserPool;
   appClient: UserPoolClient;
   gatewayDomain: DomainName;
@@ -105,7 +106,7 @@ export class APIStack extends Stack {
         domainName: props.gatewayDomain,
       },
       corsPreflight: {
-        allowOrigins: ["http://localhost:3000"],
+        allowOrigins: [`https://${props.webAppDomain}`],
         allowMethods: [
           CorsHttpMethod.GET,
           CorsHttpMethod.PUT,
@@ -133,6 +134,7 @@ export class APIStack extends Stack {
               REGION: this.region,
             },
             memorySize: 128,
+            timeout: Duration.seconds(5),
           }
         );
         // grant permissions
@@ -165,6 +167,12 @@ export class APIStack extends Stack {
       handler: "handler",
       functionName: `${props.appName}-Cors`,
       entry: path.join(__dirname, "../lambdas/cors/index.ts"),
+      environment: {
+        WEB_APP_DOMAIN: props.webAppDomain,
+      },
+      bundling: {
+        externalModules: ["aws-cdk-lib"],
+      },
     });
 
     const integration = new HttpLambdaIntegration(`CorsIntegration`, lambda);

@@ -11,6 +11,7 @@ import { Construct } from "constructs";
 
 interface StorageStackProps extends StackProps {
   appName: string;
+  webAppDomain: string;
 }
 
 export class StorageStack extends Stack {
@@ -27,7 +28,6 @@ export class StorageStack extends Stack {
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
       encryption: BucketEncryption.S3_MANAGED,
       versioned: true,
-      removalPolicy: RemovalPolicy.DESTROY, // TODO RETAIN ON PROD
       lifecycleRules: [
         {
           noncurrentVersionExpiration: Duration.days(90),
@@ -41,8 +41,8 @@ export class StorageStack extends Stack {
       ],
       cors: [
         {
-          allowedOrigins: ["http://localhost:3000"],
-          allowedMethods: [HttpMethods.PUT],
+          allowedOrigins: [`https://${props.webAppDomain}`],
+          allowedMethods: [HttpMethods.PUT, HttpMethods.GET],
           allowedHeaders: ["*"],
           exposedHeaders: ["ETag"],
         },
