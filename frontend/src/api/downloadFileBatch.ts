@@ -1,4 +1,5 @@
 import { callApi } from "@/lib/callApi";
+import { BATCH_SIZE } from "@/lib/constants";
 import { HTTP_METHOD } from "@/lib/enums";
 import { DownloadFileBatchParams, PresignedUrl } from "@/lib/types";
 import { transformFolderPath } from "@/lib/utils";
@@ -6,10 +7,16 @@ import { transformFolderPath } from "@/lib/utils";
 export async function downloadFileBatch({
   files,
   folderPath,
+  currentIndex,
 }: DownloadFileBatchParams) {
   const path = transformFolderPath(folderPath);
+  const startIndex = currentIndex;
+  const endIndex = currentIndex + BATCH_SIZE;
+
+  const filesToDownload = files.slice(startIndex, endIndex);
+
   const body = {
-    files: files.map((file) => ({
+    files: filesToDownload.map((file) => ({
       folderPath: path,
       fileName: file.name,
     })),

@@ -69,6 +69,11 @@ const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
     }
   };
 
+  const handleClosePreview = () => {
+    setShowImageViewer(false);
+    setCurrentFileIndex(0);
+  };
+
   return (
     <div
       {...getRootProps({
@@ -224,7 +229,7 @@ const FileViewer = ({ currentPath, addPath }: FileViewerProps) => {
           currentFileIndex={currentFileIndex}
           directoryList={directoryData?.files ?? []}
           show={showImageViewer}
-          close={() => setShowImageViewer(false)}
+          close={handleClosePreview}
         />
       )}
     </div>

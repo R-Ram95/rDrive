@@ -37,6 +37,7 @@ export interface UploadFileBatchParams {
 export interface DownloadFileBatchParams {
   files: DirectoryItemType[];
   folderPath: string;
+  currentIndex: number;
 }
 
 export interface UploadFileAPIArgs extends UploadFileBatchParams {

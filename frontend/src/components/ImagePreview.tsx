@@ -1,5 +1,7 @@
 import useDownloadFileBatch from "@/hooks/useDownloadFileBatch";
+import { BATCH_SIZE } from "@/lib/constants";
 import { DirectoryItemType } from "@/lib/types";
+import { useState } from "react";
 import Viewer from "react-viewer";
 
 interface ImageViewerProps {
@@ -17,25 +19,53 @@ const ImageViewer = ({
   show,
   close,
 }: ImageViewerProps) => {
-  const { data, isLoading } = useDownloadFileBatch({
-    files: directoryList,
-    folderPath: currentPath,
+  const [activeIndex, setActiveIndex] = useState(() => {
+    if (currentFileIndex < BATCH_SIZE) {
+      return currentFileIndex;
+    }
+    return 0;
   });
 
-  const images = data?.map((image) => ({ src: image.url, alt: "" }));
+  const { data, isLoading, fetchNextPage } = useDownloadFileBatch({
+    files: directoryList,
+    folderPath: currentPath,
+    currentIndex: currentFileIndex,
+  });
+
+  const pageList = !isLoading
+    ? data?.pages.reduce((initPage, nextPage) => {
+        if (initPage && nextPage) {
+          return initPage?.concat(nextPage);
+        }
+        return [];
+      })
+    : [];
+
+  const images = !isLoading
+    ? pageList?.map((image) => ({ src: image?.url ?? "", alt: "" }))
+    : [];
+
+  const handleImageChange = (newIndex: number) => {
+    if (images && newIndex === images.length - 2) {
+      fetchNextPage();
+      setActiveIndex(newIndex);
+    }
+  };
 
   return (
     <div>
-      {!isLoading && (
+      {!isLoading && images?.length !== 0 && (
         <Viewer
           visible={show}
           onClose={() => {
             close();
           }}
-          activeIndex={currentFileIndex}
+          loop={false}
+          activeIndex={activeIndex}
           images={images}
-          attribute={false}
-          scalable={false}
+          downloadable
+          downloadInNewWindow
+          onChange={(_, newIndex) => handleImageChange(newIndex)}
         />
       )}
     </div>
